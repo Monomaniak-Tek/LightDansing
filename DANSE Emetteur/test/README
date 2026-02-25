@@ -1,0 +1,103 @@
+Projet ESP32 - Contrôle LED APA102 via ESP-NOW
+Description
+
+Ce projet permet de contrôler des bandes LED APA102 avec un ESP32 émetteur qui envoie des commandes à un ou plusieurs ESP32 récepteurs via ESP-NOW.
+Les effets lumineux peuvent être déclenchés depuis une interface web hébergée par l’émetteur, en broadcast vers tous les récepteurs.
+
+Fonctionnalités principales :
+
+Contrôle de LED ON / OFF
+
+Effets lumineux :
+
+Vague lumineuse
+
+Pulsation
+
+Stroboscope
+
+Arc-en-ciel
+
+Explosion centrale
+
+Scanner gauche-droite
+
+Étincelles aléatoires
+
+Couleur fixe (bleu)
+
+Accélération lumineuse
+
+Communication sans fil rapide et sans Wi-Fi classique grâce à ESP-NOW
+
+Interface web simple pour déclencher les effets
+
+Matériel requis
+
+2 × ESP32 (ou plus selon les récepteurs désirés)
+
+Bande LED APA102 (pour chaque récepteur)
+
+Câblage approprié pour les bandes LED (DATA, CLOCK, GND, +5V)
+
+Ordinateur pour programmer les ESP32
+
+Structure du projet
+projet-esp32-led/
+├─ src/
+│  ├─ main_emetteur.cpp        # Programme principal émetteur
+│  ├─ main_recepteur.cpp       # Programme principal récepteur
+│  ├─ modele.h                 # Effets LED et configuration bande APA102
+│  ├─ webpage.h                # Page HTML pour l’interface web
+│  └─ receivers.h              # Définition MAC récepteurs
+├─ platformio.ini              # Configuration PlatformIO
+└─ README.md                   # Ce fichier
+
+Configuration et usage
+Émetteur
+
+Modifier l’adresse MAC des récepteurs dans receivers.h.
+
+Brancher l’ESP32 à l’ordinateur et téléverser main_emetteur.cpp.
+
+Lancer le moniteur série pour suivre les commandes envoyées.
+
+Accéder à l’interface web via l’ESP32 (AP créé DANSE) pour contrôler les effets.
+
+Récepteur
+
+Connecter la bande LED APA102 sur les pins définis dans modele.h (DATA et CLOCK).
+
+Téléverser main_recepteur.cpp sur l’ESP32 récepteur.
+
+Le récepteur se met en attente des commandes ESP-NOW et applique les effets lumineux correspondants.
+
+Vérifier le moniteur série pour suivre les codes reçus.
+
+Auteurs et dates
+
+Auteur : Benjamin
+
+Date de création : Février 2026
+
+Langage : C++ (Arduino / ESP32)
+
+Bibliothèques :
+
+FastLED
+
+WiFi
+
+ESP-NOW
+
+WebServer
+
+Notes
+
+Tous les récepteurs doivent être sur le même canal Wi-Fi que l’émetteur pour que ESP-NOW fonctionne.
+
+Le broadcast ESP-NOW permet d’envoyer les effets à tous les récepteurs simultanément.
+
+Les effets sont exécutés en boucle dans le récepteur tant qu’ils ne sont pas changés par une nouvelle commande.
+
+Pour éviter que le moniteur série affiche le même effet à répétition, il est possible de n’afficher le message que lorsqu’il change (dernierEffet != effetActuel).
