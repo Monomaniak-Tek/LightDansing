@@ -18,7 +18,7 @@ CRGB leds[NUM_LEDS];
 // ==============================
 void initLED() {
     FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(leds, NUM_LEDS);
-    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1000); // limite à 500 mA
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, 1500); // limite à 1500 mA
     FastLED.setBrightness(255); // IMPORTANT
     FastLED.clear();
     FastLED.show();

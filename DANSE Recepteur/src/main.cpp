@@ -15,10 +15,13 @@ volatile bool commandeEnAttente = false;
 volatile uint8_t effetEnAttente = 0xFF;
 volatile bool couleurEnAttente = false;
 volatile uint8_t rEnAttente = 0, gEnAttente = 0, bEnAttente = 0, luminositeEnAttente = 0;
+volatile bool couleurFixePacketEnAttente = false;
 unsigned long lastModeleFrameMs = 0;
 // Doit etre superieur a la plus longue duree entre 2 frames cote emetteur.
 const unsigned long MODELE_TIMEOUT_MS = 25000;
 const uint8_t LOCAL_BRIGHTNESS = 255;
+CRGB couleurFixeActuelle = CRGB::Blue;
+uint8_t luminositeFixeActuelle = 255;
 
 // ==============================
 // Callback ESP-NOW
@@ -35,14 +38,18 @@ void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
         }
     }
 
-    // COULEUR (5 octets): masque + r + g + b + luminosite
+    // COULEUR (5 octets): meta + r + g + b + luminosite
+    // meta bit7=1 -> couleur fixe (effet 9), bit7=0 -> frame modele externe
     if (len == 5) {
-        uint8_t groupeMask = data[0];
+        uint8_t meta = data[0];
+        uint8_t groupeMask = meta & 0x7F;
+        bool isCouleurFixe = (meta & 0x80) != 0;
         if (groupeMask & (1 << monGroupe)) {
             rEnAttente = data[1];
             gEnAttente = data[2];
             bEnAttente = data[3];
             luminositeEnAttente = data[4];
+            couleurFixePacketEnAttente = isCouleurFixe;
             couleurEnAttente = true;
         }
     }
@@ -108,14 +115,26 @@ void loop() {
         uint8_t g = gEnAttente;
         uint8_t b = bEnAttente;
         uint8_t luminosite = luminositeEnAttente;
+        bool isCouleurFixe = couleurFixePacketEnAttente;
         couleurEnAttente = false;
 
-        // Une trame couleur valide indique que le modele externe est en cours.
-        modeleExterneActif = true;
-        FastLED.setBrightness(luminosite);
-        fill_solid(leds, NUM_LEDS, CRGB(r, g, b));
-        FastLED.show();
-        lastModeleFrameMs = millis();
+        if (isCouleurFixe) {
+            // Couleur de l'effet local 9
+            couleurFixeActuelle = CRGB(r, g, b);
+            luminositeFixeActuelle = luminosite;
+            modeleExterneActif = false;
+            if (effetActuel == 9) {
+                FastLED.setBrightness(luminositeFixeActuelle);
+                effetCouleurFixe(couleurFixeActuelle);
+            }
+        } else {
+            // Une trame couleur modele valide indique que le modele externe est en cours.
+            modeleExterneActif = true;
+            FastLED.setBrightness(luminosite);
+            fill_solid(leds, NUM_LEDS, CRGB(r, g, b));
+            FastLED.show();
+            lastModeleFrameMs = millis();
+        }
     }
 
     if (modeleExterneActif && (millis() - lastModeleFrameMs > MODELE_TIMEOUT_MS)) {
@@ -140,7 +159,10 @@ void loop() {
             case 6:  effetExplosion();     break;
             case 7:  effetScanner();       break;
             case 8:  effetEtincelles();    break;
-            case 9:  effetCouleurFixe();   break;
+            case 9:
+                FastLED.setBrightness(luminositeFixeActuelle);
+                effetCouleurFixe(couleurFixeActuelle);
+                break;
             case 10: effetAcceleration();  break;
             default: break;
         }

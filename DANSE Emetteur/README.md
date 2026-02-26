@@ -21,7 +21,8 @@ Cet ESP32 heberge une interface web et envoie des commandes/evenements LED aux r
 ## Fichiers importants
 - `src/main.cpp` : logique web + envoi ESP-NOW + lecture non bloquante du modele
 - `src/modelePersonalise.cpp` : frames du modele personnalise
-- `src/webpage.h` : page web de controle
+- `web/webpage.html` : page web source (editable)
+- `include/webpage.generated.h` : header auto-genere a la compilation
 
 ## Build / Upload (PlatformIO)
 ```bash

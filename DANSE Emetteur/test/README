@@ -48,7 +48,8 @@ projet-esp32-led/
 │  ├─ main_emetteur.cpp        # Programme principal émetteur
 │  ├─ main_recepteur.cpp       # Programme principal récepteur
 │  ├─ modele.h                 # Effets LED et configuration bande APA102
-│  ├─ webpage.h                # Page HTML pour l’interface web
+│  ├─ web/webpage.html         # Page HTML source
+│  └─ include/webpage.generated.h  # Header genere automatiquement
 │  └─ receivers.h              # Définition MAC récepteurs
 ├─ platformio.ini              # Configuration PlatformIO
 └─ README.md                   # Ce fichier
