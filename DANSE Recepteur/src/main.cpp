@@ -8,6 +8,9 @@
 // ==============================
 uint8_t monGroupe = 0;           // 0=Bleu, 1=Rouge, etc.
 volatile uint8_t effetActuel = 0xFF;  // 0xFF = aucun effet actif
+const uint8_t EFFET_MODELE_START = 200;
+const uint8_t EFFET_MODELE_END = 201;
+const uint8_t FLAG_COULEUR_FIXE = 0x80;
 
 // Modèle externe
 bool modeleExterneActif = false;
@@ -22,6 +25,7 @@ const unsigned long MODELE_TIMEOUT_MS = 25000;
 const uint8_t LOCAL_BRIGHTNESS = 255;
 CRGB couleurFixeActuelle = CRGB::Blue;
 uint8_t luminositeFixeActuelle = 255;
+portMUX_TYPE espNowMux = portMUX_INITIALIZER_UNLOCKED;
 
 // ==============================
 // Callback ESP-NOW
@@ -33,8 +37,10 @@ void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
     if (len == 2) {
         uint8_t groupeMask = data[0];
         if (groupeMask & (1 << monGroupe)) {
+            portENTER_CRITICAL_ISR(&espNowMux);
             effetEnAttente = data[1];
             commandeEnAttente = true;
+            portEXIT_CRITICAL_ISR(&espNowMux);
         }
     }
 
@@ -43,14 +49,16 @@ void onDataRecv(const uint8_t *mac_addr, const uint8_t *data, int len) {
     if (len == 5) {
         uint8_t meta = data[0];
         uint8_t groupeMask = meta & 0x7F;
-        bool isCouleurFixe = (meta & 0x80) != 0;
+        bool isCouleurFixe = (meta & FLAG_COULEUR_FIXE) != 0;
         if (groupeMask & (1 << monGroupe)) {
+            portENTER_CRITICAL_ISR(&espNowMux);
             rEnAttente = data[1];
             gEnAttente = data[2];
             bEnAttente = data[3];
             luminositeEnAttente = data[4];
             couleurFixePacketEnAttente = isCouleurFixe;
             couleurEnAttente = true;
+            portEXIT_CRITICAL_ISR(&espNowMux);
         }
     }
 }
@@ -89,15 +97,23 @@ void setup() {
 // Loop
 // ==============================
 void loop() {
+    bool hasCommande = false;
+    uint8_t effet = 0;
+    portENTER_CRITICAL(&espNowMux);
     if (commandeEnAttente) {
-        uint8_t effet = effetEnAttente;
+        effet = effetEnAttente;
         commandeEnAttente = false;
+        hasCommande = true;
+    }
+    portEXIT_CRITICAL(&espNowMux);
 
-        if (effet == 200) {
+    if (hasCommande) {
+
+        if (effet == EFFET_MODELE_START) {
             modeleExterneActif = true;
             lastModeleFrameMs = millis();
             Serial.println("Modele externe ON");
-        } else if (effet == 201) {
+        } else if (effet == EFFET_MODELE_END) {
             modeleExterneActif = false;
             effetActuel = 0; // blackout apres fin du modele externe
             FastLED.setBrightness(LOCAL_BRIGHTNESS);
@@ -110,13 +126,22 @@ void loop() {
         }
     }
 
+    bool hasCouleur = false;
+    uint8_t r = 0, g = 0, b = 0, luminosite = 0;
+    bool isCouleurFixe = false;
+    portENTER_CRITICAL(&espNowMux);
     if (couleurEnAttente) {
-        uint8_t r = rEnAttente;
-        uint8_t g = gEnAttente;
-        uint8_t b = bEnAttente;
-        uint8_t luminosite = luminositeEnAttente;
-        bool isCouleurFixe = couleurFixePacketEnAttente;
+        r = rEnAttente;
+        g = gEnAttente;
+        b = bEnAttente;
+        luminosite = luminositeEnAttente;
+        isCouleurFixe = couleurFixePacketEnAttente;
         couleurEnAttente = false;
+        hasCouleur = true;
+    }
+    portEXIT_CRITICAL(&espNowMux);
+
+    if (hasCouleur) {
 
         if (isCouleurFixe) {
             // Couleur de l'effet local 9

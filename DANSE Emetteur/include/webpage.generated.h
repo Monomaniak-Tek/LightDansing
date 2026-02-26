@@ -33,7 +33,7 @@ input[type="file"] { margin: 12px; }
 <label><input type="checkbox" value="0" checked> Bleu</label>
 <label><input type="checkbox" value="1" checked> Rouge</label>
 <label><input type="checkbox" value="2" checked> Vert</label>
-<label><input type="checkbox" value="3" checked> Noir</label>
+<label><input type="checkbox" value="3" checked> Violet</label>
 <label><input type="checkbox" value="4" checked> Blanc</label>
 <label><input type="checkbox" value="5" checked> Jaune</label>
 </div>

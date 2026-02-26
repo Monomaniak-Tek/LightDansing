@@ -12,6 +12,7 @@
 #define CLOCK_PIN 23        // pin CLOCK du bandeau APA102
 
 CRGB leds[NUM_LEDS];
+extern uint8_t monGroupe;
 
 // ==============================
 // INITIALISATION
@@ -30,15 +31,31 @@ void initLED() {
 // ==============================
 
 void effetDemarrage() {
+    CRGB couleurGroupe = CRGB::White;
+    switch (monGroupe) {
+        case 0: couleurGroupe = CRGB::Blue;   break;
+        case 1: couleurGroupe = CRGB::Red;    break;
+        case 2: couleurGroupe = CRGB::Green;  break;
+        case 3: couleurGroupe = CRGB::Purple; break; // anciennement "Noir"
+        case 4: couleurGroupe = CRGB::White;  break;
+        case 5: couleurGroupe = CRGB::Yellow; break;
+        default: break;
+    }
 
     for (int b = 0; b <= 255; b += 5) {
-        fill_solid(leds, NUM_LEDS, CRGB(b, b, b));
+        CRGB c((uint8_t)((couleurGroupe.r * b) / 255),
+               (uint8_t)((couleurGroupe.g * b) / 255),
+               (uint8_t)((couleurGroupe.b * b) / 255));
+        fill_solid(leds, NUM_LEDS, c);
         FastLED.show();
         delay(8);
     }
 
     for (int b = 255; b >= 0; b -= 5) {
-        fill_solid(leds, NUM_LEDS, CRGB(b, b, b));
+        CRGB c((uint8_t)((couleurGroupe.r * b) / 255),
+               (uint8_t)((couleurGroupe.g * b) / 255),
+               (uint8_t)((couleurGroupe.b * b) / 255));
+        fill_solid(leds, NUM_LEDS, c);
         FastLED.show();
         delay(8);
     }

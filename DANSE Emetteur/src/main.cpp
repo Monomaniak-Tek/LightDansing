@@ -18,6 +18,8 @@ unsigned long nextFrameAtMs = 0;
 uint8_t modeleMaskActif = 0xFF;
 const uint8_t MODELE_BOUTON_MASK = 0x3F; // groupes 0..5
 const uint8_t FLAG_COULEUR_FIXE = 0x80;  // trame couleur fixe (effet 9)
+const uint8_t EFFET_MODELE_START = 200;
+const uint8_t EFFET_MODELE_END = 201;
 const int8_t WIFI_TX_POWER = 68; // 68 => ~17 dBm (valeur en 0.25 dBm)
 
 // Bouton: INPUT_PULLUP (HIGH relache, LOW appuye)
@@ -43,8 +45,7 @@ void playModele() {
 
     if (frameIndex >= NUM_FRAMES) {
         modeleActif = false;
-        // 201 = fin modele externe
-        sendCommandeESPNowRepete(modeleMaskActif, 201);
+        sendCommandeESPNowRepete(modeleMaskActif, EFFET_MODELE_END);
         Serial.println("FIN MODELE");
         return;
     }
@@ -95,7 +96,7 @@ void sendESPNow(uint8_t masque, uint8_t effet) {
     // Toujours envoyer le masque + effet (repete pour fiabilite)
     sendCommandeESPNowRepete(masque, effet);
 
-    if(effet == 200) {
+    if(effet == EFFET_MODELE_START) {
         Serial.println("Activation modele externe");
         modeleActif = true;
         modeleMaskActif = masque;
@@ -110,7 +111,6 @@ void sendESPNow(uint8_t masque, uint8_t effet) {
 
 void sendCouleurFixe(uint8_t masque, uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     uint8_t meta = (masque & 0x7F) | FLAG_COULEUR_FIXE;
-const int8_t WIFI_TX_POWER = 68; // 68 => ~17 dBm (valeur en 0.25 dBm)
     uint8_t msg[5] = {meta, r, g, b, brightness};
     esp_now_send(broadcastMAC, msg, 5);
 
@@ -160,7 +160,7 @@ void handleBoutonModele() {
         btnStateStable = reading;
         if (btnStateStable == LOW) {
             Serial.println("Bouton modele: lancement");
-            sendESPNow(MODELE_BOUTON_MASK, 200);
+            sendESPNow(MODELE_BOUTON_MASK, EFFET_MODELE_START);
         }
     }
 }
