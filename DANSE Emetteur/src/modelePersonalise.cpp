@@ -2,19 +2,43 @@
 #include <Arduino.h>
 
 // Format d'une frame:
-// { r, g, b, brightness, durationMs }
+// { r, g, b, brightness, durationMs, [groupMask optionnel] }
 // r          : intensite rouge (0-255)
 // g          : intensite vert (0-255)
 // b          : intensite bleu (0-255)
 // brightness : luminosite globale FastLED (0-255)
 // durationMs : duree d'affichage de la frame en millisecondes
+// groupMask  : bits groupes 0..5 (optionnel, defaut=0x3F tous groupes)
+// Exemple frame groupe 2 uniquement: {255, 0, 0, 120, 100, GROUPS(2)}
+// Exemple frame groupes 0,1,3,4   : {255, 0, 0, 120, 100, GROUPS(0134)}
+//
+// Exemple complet (copier/coller possible) :
+// #if 0
+// const Frame modele[] = {
+//   // Intro rouge -> groupes 0,1,3,4
+//   {255, 0,   0,   40, 120, GROUPS(0134)},
+//   {255, 0,   0,   80, 120, GROUPS(0134)},
+//   {255, 0,   0,  140, 120, GROUPS(0134)},
+//
+//   // Vague bleue -> groupes 2 et 5
+//   {0,   0, 255,  70, 100, GROUPS(25)},
+//   {0,   0, 255, 130, 100, GROUPS(25)},
+//   {0,   0, 255, 200, 100, GROUPS(25)},
+//
+//   // Full blanc -> tous groupes
+//   {255, 255, 255, 220, 150},
+//
+//   // Noir final
+//   {0,   0,   0,    0, 200},
+// };
+// #endif
 const Frame modele[] = {
     {255, 0, 0, 3, 50},
     {255, 0, 0, 5, 50},
     {255, 0, 0, 7, 50},
     {255, 0, 0, 9, 50},
     {255, 0, 0, 11, 50},
-    {255, 0, 0, 13, 50},
+    {255, 0, 0, 13, 50, GROUPS(0134)},
     {255, 0, 0, 15, 50},
     {255, 0, 0, 18, 50},
     {255, 0, 0, 20, 50},
@@ -22,7 +46,7 @@ const Frame modele[] = {
     {255, 0, 0, 24, 50},
     {255, 0, 0, 26, 50},
     {255, 0, 0, 28, 50},
-    {255, 0, 0, 30, 50},
+    {255, 0, 0, 13, 50, GROUPS(234)},
     {255, 0, 0, 32, 50},
     {255, 0, 0, 35, 50},
     {255, 0, 0, 37, 50},

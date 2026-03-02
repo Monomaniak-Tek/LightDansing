@@ -12,9 +12,21 @@ body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; bac
 h1 { margin-bottom: 20px; }
 .section { margin: 20px; }
 button { font-size: 18px; padding: 12px; margin: 6px; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+.modele-btn.btn-active {
+  background-color: #27ae60;
+  box-shadow: 0 0 0 2px #eaffea inset, 0 0 12px rgba(39, 174, 96, 0.8);
+}
 label { margin: 8px; display: inline-block; }
 input[type="file"] { margin: 12px; }
 .inline-couleur-fixe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.inline-modele-perso {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,27 +52,42 @@ input[type="file"] { margin: 12px; }
 
 <div class="section">
 <h2>Effets lumineux</h2>
-<button onclick="envoyer(0)">0 - Éteint</button>
-<button onclick="envoyer(1)">Blanc fixe</button>
-<button onclick="envoyer(2)">Vague lumineuse</button>
-<button onclick="envoyer(3)">Pulsation</button>
-<button onclick="envoyer(4)">Stroboscope</button>
-<button onclick="envoyer(5)">Arc-en-ciel</button>
-<button onclick="envoyer(6)">Explosion centrale</button>
-<button onclick="envoyer(7)">Scanner gauche-droite</button>
-<button onclick="envoyer(8)">Étincelles</button>
+<button id="btnEffet0" class="modele-btn" onclick="envoyer(0, 'btnEffet0')">0 - Éteint</button>
+<button id="btnEffet1" class="modele-btn" onclick="envoyer(1, 'btnEffet1')">Blanc fixe</button>
+<button id="btnEffet2" class="modele-btn" onclick="envoyer(2, 'btnEffet2')">Vague lumineuse</button>
+<button id="btnEffet3" class="modele-btn" onclick="envoyer(3, 'btnEffet3')">Pulsation</button>
+<button id="btnEffet4" class="modele-btn" onclick="envoyer(4, 'btnEffet4')">Stroboscope</button>
+<button id="btnEffet5" class="modele-btn" onclick="envoyer(5, 'btnEffet5')">Arc-en-ciel</button>
+<button id="btnEffet6" class="modele-btn" onclick="envoyer(6, 'btnEffet6')">Explosion centrale</button>
+<button id="btnEffet7" class="modele-btn" onclick="envoyer(7, 'btnEffet7')">Scanner gauche-droite</button>
+<button id="btnEffet8" class="modele-btn" onclick="envoyer(8, 'btnEffet8')">Étincelles</button>
 <div class="inline-couleur-fixe">
-  <button onclick="envoyerCouleurFixe()">Couleur fixe choisie</button>
+  <button id="btnCouleurFixe" class="modele-btn" onclick="envoyerCouleurFixe('btnCouleurFixe')">Couleur fixe choisie</button>
   <input type="color" id="couleurFixe" value="#0000ff" title="Choisir la couleur fixe">
 </div>
-<button onclick="envoyer(10)">Accélération </button>
-<button onclick="modelePerso()">Modèle perso + musique</button>
+<button id="btnEffet10" class="modele-btn" onclick="envoyer(10, 'btnEffet10')">Accélération </button>
+<div class="inline-modele-perso">
+  <button id="btnModelePerso" class="modele-btn" onclick="modelePerso('btnModelePerso')">Modèle perso + musique</button>
+  <input type="file" id="mp3file" accept="audio/mp3">
+  <audio id="audioPlayer" controls></audio>
+</div>
 </div>
 
 <div class="section">
-<h2>Lecture MP3 sur smartphone</h2>
-<input type="file" id="mp3file" accept="audio/mp3">
-<audio id="audioPlayer" controls></audio>
+<h2>Configuration recepteurs (en lot)</h2>
+<p>Allumer uniquement les recepteurs a configurer, puis choisir le groupe cible :</p>
+<div class="inline-couleur-fixe">
+  <label for="groupeConfig">Groupe :</label>
+  <select id="groupeConfig">
+    <option value="0">Bleu (groupe 0)</option>
+    <option value="1">Rouge (groupe 1)</option>
+    <option value="2">Vert (groupe 2)</option>
+    <option value="3">Violet (groupe 3)</option>
+    <option value="4">Blanc (groupe 4)</option>
+    <option value="5">Jaune (groupe 5)</option>
+  </select>
+</div>
+<button onclick="configurerLotDepuisChoix()">Configurer les recepteurs allumes</button>
 </div>
 
 <script>
@@ -75,11 +102,21 @@ function getMasqueGroupes() {
   return masque;
 }
 
-function modelePerso() {
+function setModeleActifButton(buttonId) {
+  document.querySelectorAll('.modele-btn').forEach(btn => btn.classList.remove('btn-active'));
+  const current = document.getElementById(buttonId);
+  if (current) current.classList.add('btn-active');
+}
+
+function modelePerso(buttonId) {
   let masque = getMasqueGroupes();
 
   // Dire aux récepteurs : mode perso
-  fetch(`/send?g=${masque}&e=200`);
+  fetch(`/send?g=${masque}&e=200`)
+    .then(() => {
+      if (buttonId) setModeleActifButton(buttonId);
+    })
+    .catch(err => console.log("Erreur envoi modele perso:", err));
 
   // Lecture MP3
   let fileInput = document.getElementById('mp3file');
@@ -92,11 +129,15 @@ function modelePerso() {
     audioPlayer.play();
   }
 }
-function envoyer(effet) {
+function envoyer(effet, buttonId) {
   let masque = getMasqueGroupes();
 
   // 2️⃣ Envoi au serveur ESP32 (ESP-NOW)
-  fetch(`/send?g=${masque}&e=${effet}`);
+  fetch(`/send?g=${masque}&e=${effet}`)
+    .then(() => {
+      if (buttonId) setModeleActifButton(buttonId);
+    })
+    .catch(err => console.log("Erreur envoi effet:", err));
 
   // 3️⃣ Jouer le MP3 seulement pour effet 10
   if(effet == 10) {
@@ -115,13 +156,34 @@ function envoyer(effet) {
   }
 }
 
-function envoyerCouleurFixe() {
+function envoyerCouleurFixe(buttonId) {
   let masque = getMasqueGroupes();
   let hex = document.getElementById('couleurFixe').value;
   let r = parseInt(hex.substring(1, 3), 16);
   let g = parseInt(hex.substring(3, 5), 16);
   let b = parseInt(hex.substring(5, 7), 16);
-  fetch(`/send?g=${masque}&e=9&cr=${r}&cg=${g}&cb=${b}`);
+  fetch(`/send?g=${masque}&e=9&cr=${r}&cg=${g}&cb=${b}`)
+    .then(() => {
+      if (buttonId) setModeleActifButton(buttonId);
+    })
+    .catch(err => console.log("Erreur envoi couleur fixe:", err));
+}
+
+function configurerLot(groupe) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du groupe ${groupe} ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setgroup?g=${groupe}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log("Erreur config lot:", err));
+}
+
+function configurerLotDepuisChoix() {
+  const groupe = parseInt(document.getElementById('groupeConfig').value, 10);
+  configurerLot(groupe);
 }
 
 // 4️⃣ Met à jour le player si on change de fichier

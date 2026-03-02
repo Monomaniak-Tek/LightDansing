@@ -20,6 +20,10 @@ const uint8_t MODELE_BOUTON_MASK = 0x3F; // groupes 0..5
 const uint8_t FLAG_COULEUR_FIXE = 0x80;  // trame couleur fixe (effet 9)
 const uint8_t EFFET_MODELE_START = 200;
 const uint8_t EFFET_MODELE_END = 201;
+const uint8_t EFFET_CFG_GROUPE_BASE = 240; // 240..245 => set groupe 0..5
+const uint8_t GROUPE_MIN = 0;
+const uint8_t GROUPE_MAX = 5;
+const uint8_t MASQUE_TOUT_GROUPES = 0x7F;
 const int8_t WIFI_TX_POWER = 68; // 68 => ~17 dBm (valeur en 0.25 dBm)
 
 // Bouton: INPUT_PULLUP (HIGH relache, LOW appuye)
@@ -33,6 +37,7 @@ uint8_t broadcastMAC[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 void sendCommandeESPNow(uint8_t masque, uint8_t effet);
 void sendCommandeESPNowRepete(uint8_t masque, uint8_t effet, uint8_t repeats = 3, uint16_t spacingMs = 25);
+void sendConfigGroupeLot(uint8_t groupe);
 
 // =====================
 // playModele : envoie les frames du modèle sans bloquer loop()
@@ -55,16 +60,22 @@ void playModele() {
     Serial.print(" duree=");
     Serial.println(modele[frameIndex].durationMs);
 
-    uint8_t msg[5] = {
-        modeleMaskActif,
-        modele[frameIndex].r,
-        modele[frameIndex].g,
-        modele[frameIndex].b,
-        modele[frameIndex].brightness
-    };
+    uint8_t frameMask = (uint8_t)(modeleMaskActif & (modele[frameIndex].groupMask & FRAME_GROUP_MASK_ALL));
+    if (frameMask != 0) {
+        uint8_t msg[5] = {
+            frameMask,
+            modele[frameIndex].r,
+            modele[frameIndex].g,
+            modele[frameIndex].b,
+            modele[frameIndex].brightness
+        };
 
-    esp_now_send(broadcastMAC, msg, 5);
-    Serial.println("ENVOI COULEUR");
+        esp_now_send(broadcastMAC, msg, 5);
+        Serial.print("ENVOI COULEUR mask=");
+        Serial.println(frameMask, HEX);
+    } else {
+        Serial.println("Frame ignoree (groupMask effectif=0)");
+    }
 
     nextFrameAtMs = now + modele[frameIndex].durationMs;
     frameIndex++;
@@ -87,19 +98,25 @@ void sendCommandeESPNowRepete(uint8_t masque, uint8_t effet, uint8_t repeats, ui
 }
 
 void sendESPNow(uint8_t masque, uint8_t effet) {
+    uint8_t masqueEffectif = (uint8_t)(masque & FRAME_GROUP_MASK_ALL);
 
     Serial.print("Envoi masque=");
-    Serial.print(masque);
+    Serial.print(masqueEffectif);
     Serial.print(" effet=");
     Serial.println(effet);
 
     // Toujours envoyer le masque + effet (repete pour fiabilite)
-    sendCommandeESPNowRepete(masque, effet);
+    sendCommandeESPNowRepete(masqueEffectif, effet);
 
     if(effet == EFFET_MODELE_START) {
+        if (masqueEffectif == 0) {
+            Serial.println("Modele perso ignore: masque effectif = 0");
+            modeleActif = false;
+            return;
+        }
         Serial.println("Activation modele externe");
         modeleActif = true;
-        modeleMaskActif = masque;
+        modeleMaskActif = masqueEffectif;
         frameIndex = 0;
         nextFrameAtMs = millis() + 50; // laisse le temps aux récepteurs sans bloquer
         Serial.println("Lecture modele...");
@@ -124,6 +141,19 @@ void sendCouleurFixe(uint8_t masque, uint8_t r, uint8_t g, uint8_t b, uint8_t br
     Serial.println(brightness);
 }
 
+void sendConfigGroupeLot(uint8_t groupe) {
+    if (groupe < GROUPE_MIN || groupe > GROUPE_MAX) {
+        return;
+    }
+
+    uint8_t effetCfg = EFFET_CFG_GROUPE_BASE + groupe;
+    // Repetition plus forte pour fiabiliser en lot.
+    sendCommandeESPNowRepete(MASQUE_TOUT_GROUPES, effetCfg, 5, 40);
+
+    Serial.print("CONFIG LOT -> groupe ");
+    Serial.println(groupe);
+}
+
 // =====================
 // handleSend : gestion HTTP GET
 // =====================
@@ -145,6 +175,22 @@ void handleSend() {
     }
 
     server.send(200, "text/plain", "OK");
+}
+
+void handleSetGroup() {
+    if (!server.hasArg("g")) {
+        server.send(400, "text/plain", "Parametre g manquant");
+        return;
+    }
+
+    int g = server.arg("g").toInt();
+    if (g < GROUPE_MIN || g > GROUPE_MAX) {
+        server.send(400, "text/plain", "Groupe invalide (0..5)");
+        return;
+    }
+
+    sendConfigGroupeLot((uint8_t)g);
+    server.send(200, "text/plain", "CONFIG LOT OK");
 }
 
 void handleBoutonModele() {
@@ -181,7 +227,7 @@ void setup() {
 
     // Wi-Fi AP + STA
     WiFi.mode(WIFI_AP_STA);            
-    WiFi.softAP("DANSE", NULL, 1);     
+    WiFi.softAP("DANSE", "fiona123", 1);     
     WiFi.disconnect();                  
     esp_wifi_set_max_tx_power(WIFI_TX_POWER); // Puissance radio fixee pour stabilite
 
@@ -218,6 +264,7 @@ void setup() {
         server.send(200, "text/html", webPage);
     });
     server.on("/send", HTTP_GET, handleSend);
+    server.on("/setgroup", HTTP_GET, handleSetGroup);
     server.begin();
     Serial.println("Serveur web démarré");
 }

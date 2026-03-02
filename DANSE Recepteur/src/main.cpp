@@ -1,6 +1,7 @@
 #include <FastLED.h>
 #include <WiFi.h>
 #include <esp_now.h>
+#include <Preferences.h>
 #include "modele.h"  // effets locaux APA102
 
 // ==============================
@@ -11,6 +12,16 @@ volatile uint8_t effetActuel = 0xFF;  // 0xFF = aucun effet actif
 const uint8_t EFFET_MODELE_START = 200;
 const uint8_t EFFET_MODELE_END = 201;
 const uint8_t FLAG_COULEUR_FIXE = 0x80;
+const uint8_t GROUPE_MAX = 5;
+const uint8_t GROUPE_DEFAUT = 0;
+const uint8_t BTN_PROVISION_PIN = 0;         // bouton BOOT integre (GPIO0)
+const unsigned long PROVISION_HOLD_MS = 800; // appui long requis
+const unsigned long PROVISION_BOOT_WINDOW_MS = 5000; // fenetre d'entree apres boot
+const unsigned long PROVISION_STEP_MS = 1000; // defilement couleurs
+const unsigned long BTN_DEBOUNCE_MS = 25;
+const char* NVS_NAMESPACE = "danse";
+const char* NVS_KEY_GROUPE = "groupe";
+Preferences prefs;
 
 // Modèle externe
 bool modeleExterneActif = false;
@@ -26,6 +37,126 @@ const uint8_t LOCAL_BRIGHTNESS = 255;
 CRGB couleurFixeActuelle = CRGB::Blue;
 uint8_t luminositeFixeActuelle = 255;
 portMUX_TYPE espNowMux = portMUX_INITIALIZER_UNLOCKED;
+
+CRGB couleurPourGroupe(uint8_t groupe) {
+    switch (groupe) {
+        case 0: return CRGB::Blue;
+        case 1: return CRGB::Red;
+        case 2: return CRGB::Green;
+        case 3: return CRGB::Purple;
+        case 4: return CRGB::White;
+        case 5: return CRGB::Yellow;
+        default: return CRGB::White;
+    }
+}
+
+uint8_t chargeGroupeDepuisNVS() {
+    if (!prefs.begin(NVS_NAMESPACE, false)) {
+        Serial.println("NVS indisponible, groupe par defaut");
+        return GROUPE_DEFAUT;
+    }
+    uint8_t groupe = prefs.getUChar(NVS_KEY_GROUPE, GROUPE_DEFAUT);
+    prefs.end();
+    if (groupe > GROUPE_MAX) {
+        groupe = GROUPE_DEFAUT;
+    }
+    return groupe;
+}
+
+void sauvegardeGroupeNVS(uint8_t groupe) {
+    if (groupe > GROUPE_MAX) {
+        groupe = GROUPE_DEFAUT;
+    }
+    if (!prefs.begin(NVS_NAMESPACE, false)) {
+        Serial.println("Erreur ouverture NVS pour sauvegarde groupe");
+        return;
+    }
+    prefs.putUChar(NVS_KEY_GROUPE, groupe);
+    prefs.end();
+}
+
+bool provisioningDemandeAuBoot() {
+    // Sur ESP32 DevKit, GPIO0 est une pin de boot:
+    // ne pas exiger "maintenu a l'allumage" pour eviter le mode flash.
+    // On offre une fenetre juste apres boot pour appui long.
+    unsigned long windowStart = millis();
+    while (millis() - windowStart < PROVISION_BOOT_WINDOW_MS) {
+        if (digitalRead(BTN_PROVISION_PIN) == LOW) {
+            unsigned long pressStart = millis();
+            while (digitalRead(BTN_PROVISION_PIN) == LOW) {
+                if (millis() - pressStart >= PROVISION_HOLD_MS) {
+                    while (digitalRead(BTN_PROVISION_PIN) == LOW) {
+                        delay(5);
+                    }
+                    return true;
+                }
+                delay(5);
+            }
+        }
+        delay(5);
+    }
+    return false;
+}
+
+void clignoteValidation(CRGB couleur, uint8_t repeats = 3) {
+    for (uint8_t i = 0; i < repeats; i++) {
+        fill_solid(leds, NUM_LEDS, couleur);
+        FastLED.show();
+        delay(140);
+        FastLED.clear();
+        FastLED.show();
+        delay(140);
+    }
+}
+
+void modeProvisioningGroupe() {
+    Serial.println("=== Mode provisioning groupe ===");
+    Serial.println("Defilement 1s/couleur. Clique pour valider.");
+
+    uint8_t groupeSelection = monGroupe;
+    unsigned long lastStepMs = millis();
+
+    fill_solid(leds, NUM_LEDS, couleurPourGroupe(groupeSelection));
+    FastLED.show();
+
+    bool lastRead = HIGH;
+    bool stableState = HIGH;
+    unsigned long lastChangeMs = 0;
+
+    while (true) {
+        unsigned long now = millis();
+
+        if (now - lastStepMs >= PROVISION_STEP_MS) {
+            lastStepMs = now;
+            groupeSelection = (groupeSelection + 1) % (GROUPE_MAX + 1);
+            fill_solid(leds, NUM_LEDS, couleurPourGroupe(groupeSelection));
+            FastLED.show();
+            Serial.printf("Groupe candidat: %u\n", groupeSelection);
+        }
+
+        bool reading = digitalRead(BTN_PROVISION_PIN);
+        if (reading != lastRead) {
+            lastRead = reading;
+            lastChangeMs = now;
+        }
+
+        if ((now - lastChangeMs) >= BTN_DEBOUNCE_MS && reading != stableState) {
+            stableState = reading;
+            if (stableState == LOW) {
+                while (digitalRead(BTN_PROVISION_PIN) == LOW) {
+                    delay(5);
+                }
+                monGroupe = groupeSelection;
+                sauvegardeGroupeNVS(monGroupe);
+                clignoteValidation(couleurPourGroupe(monGroupe));
+                Serial.printf("Groupe %u valide et sauvegarde\n", monGroupe);
+                return;
+            }
+        }
+
+        delay(5);
+    }
+}
 
 // ==============================
 // Callback ESP-NOW
@@ -75,7 +206,16 @@ void setup() {
 
     Serial.println("=== Récepteur LED APA102 ===");
 
+    pinMode(BTN_PROVISION_PIN, INPUT_PULLUP);
+    monGroupe = chargeGroupeDepuisNVS();
+    Serial.printf("Groupe charge depuis NVS: %u\n", monGroupe);
+
     initLED();
+
+    if (provisioningDemandeAuBoot()) {
+        modeProvisioningGroupe();
+    }
+
     effetDemarrage(); // effet de boot
 
     // ESP-NOW
