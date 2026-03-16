@@ -1,49 +1,41 @@
-# LightDansing
+# DANSE Emetteur (ESP32)
 
-Systeme de pilotage lumineux pour salle de spectacle, base sur 2 projets ESP32:
-- **DANSE Emetteur**: interface web + envoi ESP-NOW
-- **DANSE Recepteur**: reception ESP-NOW + pilotage LED APA102
+## Role
+Cet ESP32 heberge une interface web et envoie des commandes/evenements LED aux recepteurs via ESP-NOW.
 
-## Architecture
-- 1 emetteur ESP32 cree un AP Wi-Fi `DANSE` (canal 1) et diffuse les commandes en ESP-NOW.
-- N recepteurs ESP32 (jusqu'a plusieurs dizaines) recoivent les commandes en broadcast.
-- Les recepteurs appliquent soit un effet local, soit un modele personnalise envoye frame par frame.
+Version: V1.0
 
-## Arborescence
-- `DANSE Emetteur/` : firmware emetteur
-- `DANSE Recepteur/` : firmware recepteur
+## Description globale
+Le projet DANSE pilote des bandeaux LED APA102 via un emetteur ESP32 et des recepteurs ESP32.
+L'emetteur cree un Wi-Fi local (AP ou Wi-Fi existant) et expose une interface web.
+Depuis cette page, on selectionne des groupes, on lance des effets et on joue un modele personnalise.
+Les commandes sont diffusees aux recepteurs via ESP-NOW, chaque recepteur n'appliquant que son groupe.
+La carte SD sert a stocker les modeles LED et les fichiers audio.
 
-## Protocole radio
-- **Commande effet** (2 octets): `mask, effet`
-- **Frame couleur** (5 octets): `mask, r, g, b, brightness`
-- `effet=200`: debut modele externe
-- `effet=201`: fin modele externe
+## Pinmap actuelle (emetteur)
+- `GPIO2` : LED temoin emetteur (`LED_EMETTEUR`)
 
-## Fonctionnement principal
-- L'emetteur peut repeter les commandes (fiabilite radio) avec un espacement court.
-- Le modele personnalise est joue en non-bloquant cote emetteur.
-- A la fin du modele personnalise, les recepteurs passent en blackout (LED eteintes) jusqu'a nouvelle commande.
+## Fonctionnement radio
+- Mode Wi-Fi : `WIFI_AP_STA`
+- AP cree : `DANSE`
+- Canal radio : `1`
+- ESP-NOW : envoi en broadcast
 
-## Build et flash
-Prerequis:
-- VS Code + extension PlatformIO
-- Cartes ESP32 compatibles
+## Protocole utilise
+- Trame commande (2 octets) : `mask, effet`
+- Trame couleur modele perso (5 octets) : `mask, r, g, b, brightness`
+- Effet `200` : debut modele externe
+- Effet `201` : fin modele externe
 
-Exemples de commandes:
+## Fichiers importants
+- `src/main.cpp` : logique web + envoi ESP-NOW + lecture non bloquante du modele
+- `src/modelePersonalise.cpp` : frames du modele personnalise
+- `web/webpage.html` : page web source (editable)
+- `include/webpage.generated.h` : header auto-genere a la compilation
+
+## Build / Upload (PlatformIO)
 ```bash
-cd "DANSE Emetteur"
 platformio run
 platformio run -t upload
-
-cd "../DANSE Recepteur"
-platformio run
-platformio run -t upload
+platformio device monitor -b 115200
 ```
-
-## Documentation detaillee
-- Voir le README de chaque sous-projet:
-  - `DANSE Emetteur/README.md`
-  - `DANSE Recepteur/README.md`
-
-## Depot GitHub
-- Remote: `https://github.com/Monomaniak-Tek/LightDansing`

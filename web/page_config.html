@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration récepteurs</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 24px; background-color: #111; color: white; }
+h1 { color: #27ae60; font-variant: small-caps; letter-spacing: 0.5px; }
+button { font-size: 18px; padding: 12px; margin: 6px; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+label { margin: 8px; display: inline-block; }
+.section { margin: 18px; }
+.conn-status { max-width: 700px; margin: 8px auto 14px; padding: 10px; border: 1px solid #35506a; border-radius: 8px; background: #151a20; }
+.conn-ok { border-color: #2d7d46; }
+.conn-warn { border-color: #9a6e1f; }
+.conn-ko { border-color: #8b2d2d; }
+.inline-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.help-box { max-width: 700px; margin: 12px auto; padding: 12px; border: 1px solid #413d3d; border-radius: 8px; background: #1b1b1b; text-align: left; }
+.help-box h3 { margin-top: 0; margin-bottom: 8px; }
+.help-box ol { margin: 0 0 8px 20px; padding: 0; }
+.nav { margin: 6px auto 16px; max-width: 700px; }
+.nav a { color: #7ec8ff; margin: 0 8px; }
+.footer { margin: 24px auto 16px; max-width: 700px; font-size: 12px; color: #9fb3c8; }
+.footer a { color: #9fb3c8; }
+</style>
+</head>
+<body>
+<h1>Configuration récepteurs</h1>
+<div class="nav">
+  <a href="/effets">Effets locaux</a>
+  <a href="/modele">Effet personnalise</a>
+  <a href="/config"><strong>Configuration</strong></a>
+</div>
+<div id="connStatus" class="conn-status">Connexion: verification...</div>
+<div class="inline-couleur-fixe">
+  <button onclick="window.open('/logs','_blank')">Voir les logs</button>
+</div>
+
+<div class="section">
+<h3>Configuration en lot du groupe</h3>
+<p>Allumer uniquement les recepteurs a configurer, puis choisir le groupe cible :</p>
+<div class="inline-couleur-fixe">
+  <label for="groupeConfig">Groupe :</label>
+  <select id="groupeConfig">
+    <option value="0">Bleu (groupe 0)</option>
+    <option value="1">Rouge (groupe 1)</option>
+    <option value="2">Vert (groupe 2)</option>
+    <option value="3">Violet (groupe 3)</option>
+    <option value="4">Blanc (groupe 4)</option>
+    <option value="5">Jaune (groupe 5)</option>
+  </select>
+</div>
+<button onclick="configurerLotDepuisChoix()">Configurer les récepteurs allumés</button>
+<button onclick="testerGroupe()">Test groupe</button>
+
+<div class="help-box">
+  <h3>Aide: configurer 1 récepteur individuellement (bouton récepteur)</h3>
+  <ol>
+    <li>Allumer le récepteur normalement.</li>
+    <li>Maintenir le bouton <strong>récepteur</strong> environ 2 secondes.</li>
+    <li>Le bandeau défile les couleurs de groupe (1 couleur par seconde).</li>
+    <li>Quand la bonne couleur apparaît, appuyer une 2e fois pour valider.</li>
+    <li>Le bandeau clignote: le groupe est sauvegardé (même après reboot).</li>
+  </ol>
+</div>
+
+<hr>
+
+<h3>Configuration en lot du nombre de LEDs</h3>
+<div class="inline-couleur-fixe">
+  <label for="ledCountConfig">Nombre de LEDs :</label>
+  <input id="ledCountConfig" type="number" min="1" max="250" value="30">
+</div>
+<button onclick="configurerLedCountLotDepuisChoix()">Configurer LED count en lot</button>
+
+<hr>
+
+<h3>Configuration en lot du courant max</h3>
+<div class="inline-couleur-fixe">
+  <label for="maxCurrentConfig">Courant max (mA) :</label>
+  <input id="maxCurrentConfig" type="number" min="100" max="10000" value="2500">
+</div>
+<button onclick="configurerMaxCurrentLotDepuisChoix()">Configurer courant max en lot</button>
+
+</div>
+
+<div class="footer">
+  © 2026 Association Danse Passion — Version V1.0 — Code source :
+  <a href="https://github.com/Monomaniak-Tek/LightDansing" target="_blank" rel="noopener">https://github.com/Monomaniak-Tek/LightDansing</a>
+</div>
+
+<script>
+let lastConnOkMs = 0;
+
+function setConnStatus(text, state) {
+  const el = document.getElementById('connStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('conn-ok', 'conn-warn', 'conn-ko');
+  if (state === 'ok') el.classList.add('conn-ok');
+  else if (state === 'warn') el.classList.add('conn-warn');
+  else el.classList.add('conn-ko');
+}
+
+async function pingConnexion() {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/runtimecfg?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const dt = Math.round(performance.now() - t0);
+    const now = Date.now();
+    const gap = lastConnOkMs === 0 ? 0 : now - lastConnOkMs;
+    const nbRecepteurs = (typeof data.activeReceivers === 'number') ? data.activeReceivers : '?';
+    lastConnOkMs = now;
+    if (gap > 30000) setConnStatus(`Connexion: reprise (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'warn');
+    else setConnStatus(`Connexion active (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'ok');
+  } catch (_) {
+    setConnStatus('Connexion: hors ligne / attente | Recepteurs actifs: ?', 'ko');
+  }
+}
+
+function configurerLot(groupe) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du groupe ${groupe} ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setgroup?g=${groupe}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot:', err));
+}
+
+function configurerLotDepuisChoix() {
+  const groupe = parseInt(document.getElementById('groupeConfig').value, 10);
+  configurerLot(groupe);
+}
+
+function testerGroupe() {
+  fetch('/testgroupe')
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur test groupe:', err));
+}
+
+function configurerLedCountLot(n) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du nombre de LEDs a ${n} ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setledcount?n=${n}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot LED count:', err));
+}
+
+function configurerLedCountLotDepuisChoix() {
+  let n = parseInt(document.getElementById('ledCountConfig').value, 10);
+  if (isNaN(n)) n = 30;
+  if (n < 1) n = 1;
+  if (n > 250) n = 250;
+  document.getElementById('ledCountConfig').value = n;
+  configurerLedCountLot(n);
+}
+
+function configurerMaxCurrentLot(ma) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du courant max a ${ma} mA ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setmaxcurrent?ma=${ma}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot courant max:', err));
+}
+
+function configurerMaxCurrentLotDepuisChoix() {
+  let ma = parseInt(document.getElementById('maxCurrentConfig').value, 10);
+  if (isNaN(ma)) ma = 2500;
+  if (ma < 100) ma = 100;
+  if (ma > 10000) ma = 10000;
+  document.getElementById('maxCurrentConfig').value = ma;
+  configurerMaxCurrentLot(ma);
+}
+
+async function chargerConfigRuntime() {
+  try {
+    const r = await fetch('/runtimecfg');
+    if (!r.ok) return;
+    const data = await r.json();
+
+    if (typeof data.ledCount === 'number') {
+      let n = data.ledCount;
+      if (n < 1) n = 1;
+      if (n > 250) n = 250;
+      document.getElementById('ledCountConfig').value = n;
+    }
+
+    if (typeof data.maxCurrentMa === 'number') {
+      let ma = data.maxCurrentMa;
+      if (ma < 100) ma = 100;
+      if (ma > 10000) ma = 10000;
+      document.getElementById('maxCurrentConfig').value = ma;
+    }
+  } catch (err) {
+    console.log('Erreur lecture runtimecfg:', err);
+  }
+}
+
+chargerConfigRuntime();
+pingConnexion();
+setInterval(pingConnexion, 5000);
+</script>
+</body>
+</html>

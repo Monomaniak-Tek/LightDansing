@@ -1,0 +1,1146 @@
+#pragma once
+// Auto-generated from web/page_*.html and web/js/*.js
+const char* webPagePageEffets = R"W0(
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effets locaux</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 24px; background-color: #111; color: white; }
+h1 { color: #27ae60; font-variant: small-caps; letter-spacing: 0.5px; }
+button { display:block; font-size: 18px; padding: 12px; margin: 6px auto; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+.modele-btn.btn-active { background-color: #27ae60; box-shadow: 0 0 0 2px #eaffea inset, 0 0 12px rgba(39, 174, 96, 0.8); }
+.btn-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:12px; }
+.btn-couleur-fixe input[type="color"] { width:44px; height:28px; padding:0; border:none; background:transparent; cursor:pointer; }
+label { margin: 8px; display: inline-block; }
+.section { margin: 18px; }
+.conn-status { max-width: 700px; margin: 8px auto 14px; padding: 10px; border: 1px solid #35506a; border-radius: 8px; background: #151a20; }
+.conn-ok { border-color: #2d7d46; }
+.conn-warn { border-color: #9a6e1f; }
+.conn-ko { border-color: #8b2d2d; }
+.inline-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.nav { margin: 6px auto 16px; max-width: 700px; }
+.nav a { color: #7ec8ff; margin: 0 8px; }
+.group-toggle input { display: none; }
+.group-toggle span {
+  display: inline-block;
+  min-width: 78px;
+  text-align: center;
+  font-size: 13px;
+  padding: 6px 8px;
+  margin: 2px;
+  border-radius: 8px;
+  background: #2a2f36;
+  border: 1px solid #3a4a60;
+  cursor: pointer;
+}
+.group-toggle input:checked + span {
+  background: #27ae60;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 2px #eaffea inset;
+}
+.footer { margin: 24px auto 16px; max-width: 700px; font-size: 12px; color: #9fb3c8; }
+.footer a { color: #9fb3c8; }
+</style>
+</head>
+<body>
+<h1>Effets locaux récepteurs</h1>
+<div class="nav">
+  <a href="/effets"><strong>Effets locaux</strong></a>
+  <a href="/modele">Effet personnalise</a>
+  <a href="/config">Configuration</a>
+</div>
+<div id="connStatus" class="conn-status">Connexion: vérification...</div>
+
+<div class="section">
+<h2>Choix des groupes</h2>
+<label class="group-toggle"><input type="checkbox" value="0" checked><span>Bleu</span></label>
+<label class="group-toggle"><input type="checkbox" value="1" checked><span>Rouge</span></label>
+<label class="group-toggle"><input type="checkbox" value="2" checked><span>Vert</span></label>
+<label class="group-toggle"><input type="checkbox" value="3" checked><span>Violet</span></label>
+<label class="group-toggle"><input type="checkbox" value="4" checked><span>Blanc</span></label>
+<label class="group-toggle"><input type="checkbox" value="5" checked><span>Jaune</span></label>
+</div>
+
+<div class="section">
+<h2>Luminosité globale</h2>
+<div class="inline-couleur-fixe">
+  <input type="range" id="luminositeGlobale" min="0" max="255" value="255" oninput="updateLuminositeLabel()" onchange="applyLuminositeOnRelease()">
+  <span id="luminositeValeur">255</span>
+</div>
+</div>
+
+<div class="section">
+<h2>Effets</h2>
+<button id="btnEffet0" class="modele-btn" onclick="envoyer(0, 'btnEffet0')">Éteint</button>
+<button id="btnEffet1" class="modele-btn" onclick="envoyer(1, 'btnEffet1')">Blanc fixe</button>
+<button id="btnCouleurFixe" class="modele-btn btn-couleur-fixe" onclick="envoyerCouleurFixe('btnCouleurFixe')">
+  Couleur choisie fixe
+  <input type="color" id="couleurFixe" value="#0000ff" title="Choisir la couleur fixe" onclick="event.stopPropagation();" onchange="event.stopPropagation();" oninput="event.stopPropagation();">
+</button>
+<button id="btnEffet2" class="modele-btn" onclick="envoyer(2, 'btnEffet2')">Vague lumineuse</button>
+<button id="btnEffet3" class="modele-btn" onclick="envoyer(3, 'btnEffet3')">Pulsation</button>
+<button id="btnEffet4" class="modele-btn" onclick="envoyer(4, 'btnEffet4')">Stroboscope</button>
+<button id="btnEffet5" class="modele-btn" onclick="envoyer(5, 'btnEffet5')">Arc-en-ciel</button>
+<button id="btnEffet6" class="modele-btn" onclick="envoyer(6, 'btnEffet6')">Explosion centrale</button>
+<button id="btnEffet7" class="modele-btn" onclick="envoyer(7, 'btnEffet7')">Scanner gauche-droite</button>
+<button id="btnEffet8" class="modele-btn" onclick="envoyer(8, 'btnEffet8')">Étincelles</button>
+<button id="btnEffet10" class="modele-btn" onclick="envoyer(10, 'btnEffet10')">Accélération</button>
+<button id="btnEffet11" class="modele-btn" onclick="envoyer(11, 'btnEffet11')">Paillettes</button>
+<button id="btnEffet12" class="modele-btn" onclick="envoyer(12, 'btnEffet12')">Balayage</button>
+<button id="btnEffet13" class="modele-btn" onclick="envoyer(13, 'btnEffet13')">Jonglage</button>
+<button id="btnEffet14" class="modele-btn" onclick="envoyer(14, 'btnEffet14')">BPM / Beat</button>
+<button id="btnEffet15" class="modele-btn" onclick="envoyer(15, 'btnEffet15')">Feu / Heat</button>
+<button id="btnEffet16" class="modele-btn" onclick="envoyer(16, 'btnEffet16')">Vagues couleur</button>
+</div>
+
+<div class="footer">
+  © 2026 Association Danse Passion — Code source :
+  <a href="https://github.com/Monomaniak-Tek/LightDansing" target="_blank" rel="noopener">https://github.com/Monomaniak-Tek/LightDansing</a>
+</div>
+
+<script>
+let lastConnOkMs = 0;
+
+function getMasqueGroupes() {
+  let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let masque = 0;
+  checkboxes.forEach(cb => {
+    if (cb.checked) masque |= (1 << parseInt(cb.value, 10));
+  });
+  return masque;
+}
+
+function setModeleActifButton(buttonId) {
+  document.querySelectorAll('.modele-btn').forEach(btn => btn.classList.remove('btn-active'));
+  const current = document.getElementById(buttonId);
+  if (current) current.classList.add('btn-active');
+}
+
+function setConnStatus(text, state) {
+  const el = document.getElementById('connStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('conn-ok', 'conn-warn', 'conn-ko');
+  if (state === 'ok') el.classList.add('conn-ok');
+  else if (state === 'warn') el.classList.add('conn-warn');
+  else el.classList.add('conn-ko');
+}
+
+async function pingConnexion() {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/runtimecfg?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const dt = Math.round(performance.now() - t0);
+    const now = Date.now();
+    const gap = lastConnOkMs === 0 ? 0 : now - lastConnOkMs;
+    const nbRecepteurs = (typeof data.activeReceivers === 'number') ? data.activeReceivers : '?';
+    lastConnOkMs = now;
+    if (gap > 30000) setConnStatus(`Connexion: reprise (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'warn');
+    else setConnStatus(`Connexion active (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'ok');
+  } catch (_) {
+    setConnStatus('Connexion: hors ligne / attente | Recepteurs actifs: ?', 'ko');
+  }
+}
+
+function envoyer(effet, buttonId) {
+  let masque = getMasqueGroupes();
+  fetch(`/send?g=${masque}&e=${effet}`)
+    .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+    .catch(err => console.log('Erreur envoi effet:', err));
+}
+
+function envoyerCouleurFixe(buttonId) {
+  let masque = getMasqueGroupes();
+  let hex = document.getElementById('couleurFixe').value;
+  let r = parseInt(hex.substring(1, 3), 16);
+  let g = parseInt(hex.substring(3, 5), 16);
+  let b = parseInt(hex.substring(5, 7), 16);
+  fetch(`/send?g=${masque}&e=9&cr=${r}&cg=${g}&cb=${b}`)
+    .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+    .catch(err => console.log('Erreur envoi couleur fixe:', err));
+}
+
+function updateLuminositeLabel() {
+  const v = document.getElementById('luminositeGlobale').value;
+  document.getElementById('luminositeValeur').textContent = v;
+}
+
+function setLuminositeGlobale() {
+  let masque = getMasqueGroupes();
+  let v = document.getElementById('luminositeGlobale').value;
+  fetch(`/setbrightness?g=${masque}&b=${v}`)
+    .catch(err => console.log('Erreur config luminosite:', err));
+}
+
+function applyLuminositeOnRelease() {
+  setLuminositeGlobale();
+}
+
+pingConnexion();
+setInterval(pingConnexion, 5000);
+updateLuminositeLabel();
+</script>
+</body>
+</html>
+
+)W0";
+const char* webPagePageModele = R"W1(
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effet personnalisé</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 24px; background-color: #111; color: white; }
+h1 { color: #27ae60; font-variant: small-caps; letter-spacing: 0.5px; }
+button { font-size: 18px; padding: 12px; margin: 6px; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.modele-btn.btn-active { background-color: #27ae60; box-shadow: 0 0 0 2px #eaffea inset, 0 0 12px rgba(39, 174, 96, 0.8); }
+label { margin: 8px; display: inline-block; }
+.section { margin: 18px; }
+.conn-status { max-width: 700px; margin: 8px auto 14px; padding: 10px; border: 1px solid #35506a; border-radius: 8px; background: #151a20; }
+.conn-ok { border-color: #2d7d46; }
+.conn-warn { border-color: #9a6e1f; }
+.conn-ko { border-color: #8b2d2d; }
+.sd-status { max-width: 700px; margin: 8px auto; padding: 10px; border: 1px solid #3a4a60; border-radius: 8px; background: #151a20; white-space: pre-line; }
+.inline-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.inline-modele-perso { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.nav { margin: 6px auto 16px; max-width: 700px; }
+.nav a { color: #7ec8ff; margin: 0 8px; }
+.spinner { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.footer { margin: 24px auto 16px; max-width: 700px; font-size: 12px; color: #9fb3c8; }
+.footer a { color: #9fb3c8; }
+.group-toggle input { display: none; }
+.group-toggle span {
+  display: inline-block;
+  min-width: 78px;
+  text-align: center;
+  font-size: 13px;
+  padding: 6px 8px;
+  margin: 2px;
+  border-radius: 8px;
+  background: #2a2f36;
+  border: 1px solid #3a4a60;
+  cursor: pointer;
+}
+.group-toggle input:checked + span {
+  background: #27ae60;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 2px #eaffea inset;
+}
+</style>
+</head>
+<body>
+<h1>Effet personnalisé</h1>
+<div class="nav">
+  <a href="/effets">Effets locaux</a>
+  <a href="/modele"><strong>Effet personnalisé</strong></a>
+  <a href="/config">Configuration</a>
+</div>
+<div id="connStatus" class="conn-status">Connexion: vérification...</div>
+
+<div class="section">
+<h2>Choix des groupes</h2>
+<label class="group-toggle"><input type="checkbox" value="0" checked><span>Bleu</span></label>
+<label class="group-toggle"><input type="checkbox" value="1" checked><span>Rouge</span></label>
+<label class="group-toggle"><input type="checkbox" value="2" checked><span>Vert</span></label>
+<label class="group-toggle"><input type="checkbox" value="3" checked><span>Violet</span></label>
+<label class="group-toggle"><input type="checkbox" value="4" checked><span>Blanc</span></label>
+<label class="group-toggle"><input type="checkbox" value="5" checked><span>Jaune</span></label>
+</div>
+
+<hr>
+<div class="section">
+<h2>Lecture du modèle perso</h2>
+<div id="sdInfo" class="sd-status">SD: ...</div>
+<div class="inline-couleur-fixe">
+  <label for="listeModeles">Fichier modèle LED (SD):</label>
+  <select id="listeModeles" onchange="chargerModeleSelection()"></select>
+  <span id="modelDownloadStatus" class="spinner" style="display:none;">&#x23F3;</span>
+</div>
+<div class="inline-modele-perso">
+  <button id="btnModelePersoSans" class="modele-btn" onclick="modelePersoSansMusique('btnModelePersoSans')">Lancer modèle perso SANS musique</button>
+</div>
+<div class="inline-couleur-fixe">
+  <label>Musique:</label>
+  <label><input type="radio" name="sourceAudio" value="local" checked> Local</label>
+  <label><input type="radio" name="sourceAudio" value="sd"> SD</label>
+</div>
+<div id="audioLocalBlock" class="inline-couleur-fixe">
+  <label for="mp3file">Musique locale:</label>
+  <input type="file" id="mp3file" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg">
+</div>
+<div id="audioSdBlock">
+  <!-- infos SD + musique fusionnees dans sdInfo -->
+  <div class="inline-couleur-fixe">
+    <label for="listeMusiques">Musique SD:</label>
+    <select id="listeMusiques"></select>
+    <span id="musicDownloadStatus" class="spinner" style="display:none;">&#x23F3;</span>
+  </div>
+</div>
+<div class="inline-modele-perso">
+  <audio id="audioPlayer" controls></audio>
+</div>
+<div class="inline-modele-perso">
+  <button id="btnModelePerso" class="modele-btn" onclick="modelePerso('btnModelePerso')">Lancer modèle perso AVEC musique</button>
+  <button id="btnModeleStop" class="modele-btn" onclick="stopModelePerso()">Arrêter</button>
+</div>
+</div>
+
+<hr>
+<div class="section">
+<h2>Création de modèle (depuis musique locale)</h2>
+<div class="inline-couleur-fixe">
+  <label for="mp3fileModel">Musique locale:</label>
+  <input type="file" id="mp3fileModel" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg">
+</div>
+<div class="inline-couleur-fixe">
+  <label for="modeleAutoNom">Nom modèle auto :</label>
+  <input id="modeleAutoNom" type="text" value="audio_auto" maxlength="48">
+  <button onclick="genererModeleDepuisMp3()">Générer modèle depuis MP3</button>
+</div>
+<p id="generationInfo" class="sd-status" style="max-width:700px; margin:8px auto;">Génération: en attente</p>
+</div>
+
+<div class="footer">
+  © 2026 Association Danse Passion — Code source :
+  <a href="https://github.com/Monomaniak-Tek/LightDansing" target="_blank" rel="noopener">https://github.com/Monomaniak-Tek/LightDansing</a>
+</div>
+
+<script src="/modele_generator.js"></script>
+<script>
+let lastConnOkMs = 0;
+
+function getMasqueGroupes() {
+  let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let masque = 0;
+  checkboxes.forEach(cb => {
+    if (cb.checked) masque |= (1 << parseInt(cb.value, 10));
+  });
+  return masque;
+}
+
+function getGroupDigitsText() {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let out = '';
+  checkboxes.forEach(cb => {
+    if (cb.checked) out += String(parseInt(cb.value, 10));
+  });
+  return out.length > 0 ? out : '0';
+}
+
+function setModeleActifButton(buttonId) {
+  document.querySelectorAll('.modele-btn').forEach(btn => btn.classList.remove('btn-active'));
+  const current = document.getElementById(buttonId);
+  if (current) current.classList.add('btn-active');
+}
+
+function setConnStatus(text, state) {
+  const el = document.getElementById('connStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('conn-ok', 'conn-warn', 'conn-ko');
+  if (state === 'ok') el.classList.add('conn-ok');
+  else if (state === 'warn') el.classList.add('conn-warn');
+  else el.classList.add('conn-ko');
+}
+
+let lastSdLine = 'Carte SD: ...';
+let lastMusicLine = 'Modèle chargé: "-"';
+let lastDurationLine = 'Durée: -';
+let lastFramesLine = 'Nombre de codes: -';
+let lastMusicFileLine = 'Fichier musique chargée: "-"';
+let musicSdReady = false;
+let musicSdName = '';
+
+function renderSdInfo() {
+  const el = document.getElementById('sdInfo');
+  if (!el) return;
+  el.innerHTML = lastSdLine + '<br>' + lastMusicLine + '<br>' + lastDurationLine + '<br>' + lastFramesLine + '<br>' + lastMusicFileLine;
+}
+
+function setSdInfo(text, isError = false) {
+  lastSdLine = text;
+  const el = document.getElementById('sdInfo');
+  if (!el) return;
+  el.style.borderColor = isError ? '#8b2d2d' : '#3a4a60';
+  renderSdInfo();
+}
+
+function setMusiqueInfo(text, isError = false) {
+  lastMusicFileLine = text;
+  const el = document.getElementById('sdInfo');
+  if (!el) return;
+  el.style.borderColor = isError ? '#8b2d2d' : '#3a4a60';
+  renderSdInfo();
+}
+
+function setGenerationInfo(text, isError = false) {
+  const el = document.getElementById('generationInfo');
+  if (!el) return;
+  el.textContent = text;
+  el.style.borderColor = isError ? '#8b2d2d' : '#3a4a60';
+}
+
+async function pingConnexion() {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/runtimecfg?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const dt = Math.round(performance.now() - t0);
+    const now = Date.now();
+    const gap = lastConnOkMs === 0 ? 0 : now - lastConnOkMs;
+    const nbRecepteurs = (typeof data.activeReceivers === 'number') ? data.activeReceivers : '?';
+    lastConnOkMs = now;
+    if (gap > 30000) setConnStatus(`Connexion: reprise (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'warn');
+    else setConnStatus(`Connexion active (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'ok');
+  } catch (_) {
+    setConnStatus('Connexion: hors ligne / attente | Recepteurs actifs: ?', 'ko');
+  }
+}
+
+function formatDurationMs(ms) {
+  const sec = Math.floor(ms / 1000);
+  const dec = Math.floor((ms % 1000) / 100);
+  return `${sec}.${dec}s`;
+}
+
+async function refreshSdStatus() {
+  try {
+    const r = await fetch('/sdstatus');
+    if (!r.ok) {
+      const t = await r.text();
+      setSdInfo(t, true);
+    }
+  } catch (e) {
+    setSdInfo('Erreur SD status: ' + e, true);
+  }
+}
+
+async function rafraichirModeles() {
+  try {
+    const r = await fetch('/models');
+    const data = await r.json();
+    const sel = document.getElementById('listeModeles');
+    if (!sel) return;
+
+    const previous = sel.value;
+    sel.innerHTML = '';
+
+    if (!data.models || data.models.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '(aucun modele dans /modeles)';
+      sel.appendChild(opt);
+    } else {
+      data.models.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+    }
+
+    if (previous) {
+      sel.value = previous;
+    }
+
+    lastMusicLine = 'Modèle chargé: ' + data.current;
+    lastDurationLine = 'Durée: ' + formatDurationMs(data.currentDurationMs ?? 0);
+    lastFramesLine = 'Nombre de codes: ' + (data.currentFrames ?? '?');
+    setSdInfo('Carte SD: ' + (data.sdReady ? 'présente' : 'défaut'), !data.sdReady);
+  } catch (e) {
+    setSdInfo('Erreur liste modeles: ' + e, true);
+  }
+}
+
+async function rafraichirMusiques() {
+  try {
+    const r = await fetch('/musique/list');
+    const data = await r.json();
+    const sel = document.getElementById('listeMusiques');
+    if (!sel) return;
+
+    const previous = sel.value;
+    sel.innerHTML = '';
+
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '(choisir une musique)';
+    sel.appendChild(placeholder);
+
+    if (!data.files || data.files.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '(aucune musique dans /musique)';
+      sel.appendChild(opt);
+    } else {
+      data.files.forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        sel.appendChild(opt);
+      });
+      if (previous) sel.value = previous;
+    }
+
+    renderSdInfo();
+    if (!sel.value) {
+      musicSdReady = false;
+      setModelePersoEnabled(false);
+    }
+  } catch (e) {
+    setMusiqueInfo('Erreur liste musiques: ' + e, true);
+  }
+}
+
+function setModelePersoEnabled(enabled) {
+  const btn = document.getElementById('btnModelePerso');
+  if (btn) btn.disabled = !enabled;
+}
+
+function setMusicDownloadBusy(isBusy) {
+  const el = document.getElementById('musicDownloadStatus');
+  if (el) el.style.display = isBusy ? 'inline-block' : 'none';
+}
+
+function setModelDownloadBusy(isBusy) {
+  const el = document.getElementById('modelDownloadStatus');
+  if (el) el.style.display = isBusy ? 'inline-block' : 'none';
+}
+
+async function telechargerMusique(path) {
+  try {
+    setMusicDownloadBusy(true);
+    const r = await fetch('/musique/get?path=' + encodeURIComponent(path));
+    if (!r.ok) {
+      const t = await r.text();
+      setMusiqueInfo('Chargement KO: ' + t, true);
+      setMusicDownloadBusy(false);
+      return false;
+    }
+    const blob = await r.blob();
+    const audioPlayer = document.getElementById('audioPlayer');
+    if (!audioPlayer) return false;
+    const url = URL.createObjectURL(blob);
+    audioPlayer.src = url;
+    setMusiqueInfo('Fichier musique chargée: ' + musicSdName, false);
+    setMusicDownloadBusy(false);
+    return true;
+  } catch (e) {
+    setMusiqueInfo('Erreur chargement musique: ' + e, true);
+    setMusicDownloadBusy(false);
+    return false;
+  }
+}
+
+function chargerMusiqueSelection() {
+  const sel = document.getElementById('listeMusiques');
+  if (!sel || !sel.value) return;
+  setSourceAudio('sd');
+  musicSdReady = false;
+  musicSdName = sel.value;
+  setModelePersoEnabled(false);
+  setMusiqueInfo('Telechargement musique SD...', false);
+  telechargerMusique('/musique/' + sel.value).then((ok) => {
+    musicSdReady = ok;
+    if (ok) setModelePersoEnabled(true);
+  });
+}
+
+function getSourceAudio() {
+  const checked = document.querySelector('input[name="sourceAudio"]:checked');
+  return checked ? checked.value : 'local';
+}
+
+function setSourceAudio(value) {
+  const radio = document.querySelector(`input[name="sourceAudio"][value="${value}"]`);
+  if (radio) radio.checked = true;
+  updateSourceAudioUi();
+}
+
+function updateSourceAudioUi() {
+  const source = getSourceAudio();
+  const localBlock = document.getElementById('audioLocalBlock');
+  const sdBlock = document.getElementById('audioSdBlock');
+  if (localBlock) localBlock.style.display = (source === 'local') ? 'flex' : 'none';
+  if (sdBlock) sdBlock.style.display = (source === 'sd') ? 'block' : 'none';
+  if (source === 'sd') {
+    setModelePersoEnabled(musicSdReady);
+  } else {
+    setModelePersoEnabled(true);
+  }
+}
+
+async function chargerModele(path) {
+  try {
+    setModelDownloadBusy(true);
+    const r = await fetch('/loadmodel?path=' + encodeURIComponent(path));
+    const t = await r.text();
+    if (r.ok) {
+      lastMusicLine = 'Modèle chargé: ' + path;
+      renderSdInfo();
+      refreshSdStatus();
+      rafraichirModeles();
+    } else {
+      setSdInfo('Chargement KO: ' + t, true);
+    }
+    setModelDownloadBusy(false);
+  } catch (e) {
+    setSdInfo('Erreur chargement modele: ' + e, true);
+    setModelDownloadBusy(false);
+  }
+}
+
+function chargerModeleSelection() {
+  const sel = document.getElementById('listeModeles');
+  if (!sel || !sel.value) return;
+  chargerModele('/modeles/' + sel.value);
+}
+
+function modelePerso(buttonId) {
+  let masque = getMasqueGroupes();
+  const source = getSourceAudio();
+  if (source === 'sd') {
+    if (!musicSdReady) {
+      setMusiqueInfo('Musique SD pas encore telechargee', true);
+      return;
+    }
+    const audioPlayer = document.getElementById('audioPlayer');
+    if (audioPlayer) audioPlayer.play();
+    fetch(`/send?g=${masque}&e=200`)
+      .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+      .catch(err => console.log('Erreur envoi modele perso:', err));
+    return;
+  }
+
+  fetch(`/send?g=${masque}&e=200`)
+    .then(() => {
+      if (buttonId) setModeleActifButton(buttonId);
+    })
+    .catch(err => console.log('Erreur envoi modele perso:', err));
+
+  let fileInput = document.getElementById('mp3file');
+  let audioPlayer = document.getElementById('audioPlayer');
+  if (fileInput && fileInput.files.length > 0) {
+    let file = fileInput.files[0];
+    let url = URL.createObjectURL(file);
+    audioPlayer.src = url;
+    audioPlayer.play();
+  }
+}
+
+function modelePersoSansMusique(buttonId) {
+  let masque = getMasqueGroupes();
+  fetch(`/send?g=${masque}&e=200`)
+    .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+    .catch(err => console.log('Erreur envoi modele perso (sans musique):', err));
+}
+
+function stopModelePerso() {
+  const audioPlayer = document.getElementById('audioPlayer');
+  if (audioPlayer) {
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+  }
+  setModeleActifButton('btnModeleStop');
+  fetch('/send?g=127&e=0')
+    .catch(err => console.log('Erreur arret modele perso:', err));
+}
+
+document.getElementById('mp3file').addEventListener('change', function() {
+  setSourceAudio('local');
+  let audioPlayer = document.getElementById('audioPlayer');
+  if (this.files.length > 0) {
+    let url = URL.createObjectURL(this.files[0]);
+    audioPlayer.src = url;
+  }
+});
+
+document.querySelectorAll('input[name="sourceAudio"]').forEach(r => {
+  r.addEventListener('change', updateSourceAudioUi);
+});
+
+const listeMusiquesEl = document.getElementById('listeMusiques');
+if (listeMusiquesEl) listeMusiquesEl.addEventListener('change', chargerMusiqueSelection);
+
+pingConnexion();
+refreshSdStatus();
+rafraichirModeles();
+rafraichirMusiques();
+updateSourceAudioUi();
+setInterval(pingConnexion, 5000);
+setInterval(refreshSdStatus, 15000);
+
+window.addEventListener('beforeunload', (e) => {
+  e.preventDefault();
+  e.returnValue = 'Quitter la page coupera la musique.';
+});
+</script>
+</body>
+</html>
+
+)W1";
+const char* webPagePageConfig = R"W2(
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Configuration récepteurs</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 24px; background-color: #111; color: white; }
+h1 { color: #27ae60; font-variant: small-caps; letter-spacing: 0.5px; }
+button { font-size: 18px; padding: 12px; margin: 6px; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+label { margin: 8px; display: inline-block; }
+.section { margin: 18px; }
+.conn-status { max-width: 700px; margin: 8px auto 14px; padding: 10px; border: 1px solid #35506a; border-radius: 8px; background: #151a20; }
+.conn-ok { border-color: #2d7d46; }
+.conn-warn { border-color: #9a6e1f; }
+.conn-ko { border-color: #8b2d2d; }
+.inline-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.help-box { max-width: 700px; margin: 12px auto; padding: 12px; border: 1px solid #413d3d; border-radius: 8px; background: #1b1b1b; text-align: left; }
+.help-box h3 { margin-top: 0; margin-bottom: 8px; }
+.help-box ol { margin: 0 0 8px 20px; padding: 0; }
+.nav { margin: 6px auto 16px; max-width: 700px; }
+.nav a { color: #7ec8ff; margin: 0 8px; }
+.footer { margin: 24px auto 16px; max-width: 700px; font-size: 12px; color: #9fb3c8; }
+.footer a { color: #9fb3c8; }
+</style>
+</head>
+<body>
+<h1>Configuration récepteurs</h1>
+<div class="nav">
+  <a href="/effets">Effets locaux</a>
+  <a href="/modele">Effet personnalise</a>
+  <a href="/config"><strong>Configuration</strong></a>
+</div>
+<div id="connStatus" class="conn-status">Connexion: verification...</div>
+<div class="inline-couleur-fixe">
+  <button onclick="window.open('/logs','_blank')">Voir les logs</button>
+</div>
+
+<div class="section">
+<h3>Configuration en lot du groupe</h3>
+<p>Allumer uniquement les recepteurs a configurer, puis choisir le groupe cible :</p>
+<div class="inline-couleur-fixe">
+  <label for="groupeConfig">Groupe :</label>
+  <select id="groupeConfig">
+    <option value="0">Bleu (groupe 0)</option>
+    <option value="1">Rouge (groupe 1)</option>
+    <option value="2">Vert (groupe 2)</option>
+    <option value="3">Violet (groupe 3)</option>
+    <option value="4">Blanc (groupe 4)</option>
+    <option value="5">Jaune (groupe 5)</option>
+  </select>
+</div>
+<button onclick="configurerLotDepuisChoix()">Configurer les récepteurs allumés</button>
+<button onclick="testerGroupe()">Test groupe</button>
+
+<div class="help-box">
+  <h3>Aide: configurer 1 récepteur individuellement (bouton récepteur)</h3>
+  <ol>
+    <li>Allumer le récepteur normalement.</li>
+    <li>Maintenir le bouton <strong>récepteur</strong> environ 2 secondes.</li>
+    <li>Le bandeau défile les couleurs de groupe (1 couleur par seconde).</li>
+    <li>Quand la bonne couleur apparaît, appuyer une 2e fois pour valider.</li>
+    <li>Le bandeau clignote: le groupe est sauvegardé (même après reboot).</li>
+  </ol>
+</div>
+
+<hr>
+
+<h3>Configuration en lot du nombre de LEDs</h3>
+<div class="inline-couleur-fixe">
+  <label for="ledCountConfig">Nombre de LEDs :</label>
+  <input id="ledCountConfig" type="number" min="1" max="250" value="30">
+</div>
+<button onclick="configurerLedCountLotDepuisChoix()">Configurer LED count en lot</button>
+
+<hr>
+
+<h3>Configuration en lot du courant max</h3>
+<div class="inline-couleur-fixe">
+  <label for="maxCurrentConfig">Courant max (mA) :</label>
+  <input id="maxCurrentConfig" type="number" min="100" max="10000" value="2500">
+</div>
+<button onclick="configurerMaxCurrentLotDepuisChoix()">Configurer courant max en lot</button>
+
+</div>
+
+<div class="footer">
+  © 2026 Association Danse Passion — Code source :
+  <a href="https://github.com/Monomaniak-Tek/LightDansing" target="_blank" rel="noopener">https://github.com/Monomaniak-Tek/LightDansing</a>
+</div>
+
+<script>
+let lastConnOkMs = 0;
+
+function setConnStatus(text, state) {
+  const el = document.getElementById('connStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('conn-ok', 'conn-warn', 'conn-ko');
+  if (state === 'ok') el.classList.add('conn-ok');
+  else if (state === 'warn') el.classList.add('conn-warn');
+  else el.classList.add('conn-ko');
+}
+
+async function pingConnexion() {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/runtimecfg?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const dt = Math.round(performance.now() - t0);
+    const now = Date.now();
+    const gap = lastConnOkMs === 0 ? 0 : now - lastConnOkMs;
+    const nbRecepteurs = (typeof data.activeReceivers === 'number') ? data.activeReceivers : '?';
+    lastConnOkMs = now;
+    if (gap > 30000) setConnStatus(`Connexion: reprise (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'warn');
+    else setConnStatus(`Connexion active (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'ok');
+  } catch (_) {
+    setConnStatus('Connexion: hors ligne / attente | Recepteurs actifs: ?', 'ko');
+  }
+}
+
+function configurerLot(groupe) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du groupe ${groupe} ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setgroup?g=${groupe}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot:', err));
+}
+
+function configurerLotDepuisChoix() {
+  const groupe = parseInt(document.getElementById('groupeConfig').value, 10);
+  configurerLot(groupe);
+}
+
+function testerGroupe() {
+  fetch('/testgroupe')
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur test groupe:', err));
+}
+
+function configurerLedCountLot(n) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du nombre de LEDs a ${n} ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setledcount?n=${n}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot LED count:', err));
+}
+
+function configurerLedCountLotDepuisChoix() {
+  let n = parseInt(document.getElementById('ledCountConfig').value, 10);
+  if (isNaN(n)) n = 30;
+  if (n < 1) n = 1;
+  if (n > 250) n = 250;
+  document.getElementById('ledCountConfig').value = n;
+  configurerLedCountLot(n);
+}
+
+function configurerMaxCurrentLot(ma) {
+  const ok = confirm(
+    `Confirmer la configuration en lot du courant max a ${ma} mA ?\n` +
+    `Tous les recepteurs allumes seront modifies.`
+  );
+  if (!ok) return;
+  fetch(`/setmaxcurrent?ma=${ma}`)
+    .then(r => r.text())
+    .then(msg => console.log(msg))
+    .catch(err => console.log('Erreur config lot courant max:', err));
+}
+
+function configurerMaxCurrentLotDepuisChoix() {
+  let ma = parseInt(document.getElementById('maxCurrentConfig').value, 10);
+  if (isNaN(ma)) ma = 2500;
+  if (ma < 100) ma = 100;
+  if (ma > 10000) ma = 10000;
+  document.getElementById('maxCurrentConfig').value = ma;
+  configurerMaxCurrentLot(ma);
+}
+
+async function chargerConfigRuntime() {
+  try {
+    const r = await fetch('/runtimecfg');
+    if (!r.ok) return;
+    const data = await r.json();
+
+    if (typeof data.ledCount === 'number') {
+      let n = data.ledCount;
+      if (n < 1) n = 1;
+      if (n > 250) n = 250;
+      document.getElementById('ledCountConfig').value = n;
+    }
+
+    if (typeof data.maxCurrentMa === 'number') {
+      let ma = data.maxCurrentMa;
+      if (ma < 100) ma = 100;
+      if (ma > 10000) ma = 10000;
+      document.getElementById('maxCurrentConfig').value = ma;
+    }
+  } catch (err) {
+    console.log('Erreur lecture runtimecfg:', err);
+  }
+}
+
+chargerConfigRuntime();
+pingConnexion();
+setInterval(pingConnexion, 5000);
+</script>
+</body>
+</html>
+
+)W2";
+const char* webPageAssetModeleGeneratorJs = R"W3(
+async function uploadModeleEnChunks(targetPath, modeleTxt, chunkSize = 1200) {
+  let offset = 0;
+  let first = true;
+  while (offset < modeleTxt.length) {
+    const part = modeleTxt.slice(offset, offset + chunkSize);
+    const append = first ? 0 : 1;
+    const resp = await fetch(`/savemodelchunk?path=${encodeURIComponent(targetPath)}&append=${append}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: part
+    });
+    const msg = await resp.text();
+    if (!resp.ok) throw new Error('Chunk KO: ' + msg);
+    offset += part.length;
+    first = false;
+  }
+}
+
+function sanitizeModelName(raw) {
+  const safe = (raw || '').trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
+  if (safe.length === 0) return 'audio_auto';
+  return safe.slice(0, 48);
+}
+
+function nextPow2(n) {
+  let p = 1;
+  while (p < n) p <<= 1;
+  return p;
+}
+
+function fftInPlace(re, im) {
+  const n = re.length;
+  let j = 0;
+  for (let i = 1; i < n; i++) {
+    let bit = n >> 1;
+    while (j & bit) {
+      j ^= bit;
+      bit >>= 1;
+    }
+    j ^= bit;
+    if (i < j) {
+      const tr = re[i]; re[i] = re[j]; re[j] = tr;
+      const ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+  }
+
+  for (let len = 2; len <= n; len <<= 1) {
+    const half = len >> 1;
+    const ang = -2 * Math.PI / len;
+    const wlenCos = Math.cos(ang);
+    const wlenSin = Math.sin(ang);
+
+    for (let i = 0; i < n; i += len) {
+      let wCos = 1;
+      let wSin = 0;
+      for (let k = 0; k < half; k++) {
+        const uRe = re[i + k];
+        const uIm = im[i + k];
+        const vRe = re[i + k + half] * wCos - im[i + k + half] * wSin;
+        const vIm = re[i + k + half] * wSin + im[i + k + half] * wCos;
+
+        re[i + k] = uRe + vRe;
+        im[i + k] = uIm + vIm;
+        re[i + k + half] = uRe - vRe;
+        im[i + k + half] = uIm - vIm;
+
+        const nextCos = wCos * wlenCos - wSin * wlenSin;
+        const nextSin = wCos * wlenSin + wSin * wlenCos;
+        wCos = nextCos;
+        wSin = nextSin;
+      }
+    }
+  }
+}
+
+function robustNormalize(values, pLow = 5, pHigh = 99) {
+  if (!values.length) return [];
+  const sorted = Array.from(values).sort((a, b) => a - b);
+  const loIdx = Math.floor((pLow / 100) * (sorted.length - 1));
+  const hiIdx = Math.floor((pHigh / 100) * (sorted.length - 1));
+  let lo = sorted[loIdx];
+  let hi = sorted[Math.max(hiIdx, loIdx)];
+  if (!(hi > lo)) hi = lo + 1e-9;
+
+  return values.map(v => {
+    const z = (v - lo) / (hi - lo);
+    if (z < 0) return 0;
+    if (z > 1) return 1;
+    return z;
+  });
+}
+
+function smoothSeries(values, alpha = 0.25) {
+  if (!values.length) return [];
+  const out = new Array(values.length);
+  out[0] = values[0];
+  for (let i = 1; i < values.length; i++) {
+    out[i] = alpha * values[i] + (1 - alpha) * out[i - 1];
+  }
+  return out;
+}
+
+function buildModeleFromPcm(samples, sampleRate, groupText, windowMs = 60) {
+  const win = Math.max(1, Math.round(sampleRate * windowMs / 1000));
+  const durationMs = Math.max(1, Math.round(win * 1000 / sampleRate));
+  const low = [20, 200];
+  const mid = [200, 2000];
+  const high = [2000, 8000];
+
+  const lowE = [];
+  const midE = [];
+  const highE = [];
+  const rmsArr = [];
+
+  for (let start = 0; start < samples.length; start += win) {
+    const end = Math.min(start + win, samples.length);
+    const segLen = end - start;
+    if (segLen <= 0) break;
+
+    let rmsAcc = 0;
+    for (let i = start; i < end; i++) rmsAcc += samples[i] * samples[i];
+    rmsArr.push(Math.sqrt(rmsAcc / segLen));
+
+    const nFft = nextPow2(segLen);
+    const re = new Float32Array(nFft);
+    const im = new Float32Array(nFft);
+
+    for (let i = 0; i < segLen; i++) {
+      const w = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / Math.max(1, segLen - 1));
+      re[i] = samples[start + i] * w;
+    }
+
+    fftInPlace(re, im);
+
+    let eLow = 0;
+    let eMid = 0;
+    let eHigh = 0;
+    const half = nFft >> 1;
+    for (let k = 1; k < half; k++) {
+      const f = (k * sampleRate) / nFft;
+      const mag = Math.hypot(re[k], im[k]);
+      if (f >= low[0] && f < low[1]) eLow += mag;
+      else if (f >= mid[0] && f < mid[1]) eMid += mag;
+      else if (f >= high[0] && f < high[1]) eHigh += mag;
+    }
+
+    lowE.push(eLow);
+    midE.push(eMid);
+    highE.push(eHigh);
+  }
+
+  const lowN = smoothSeries(robustNormalize(lowE), 0.25);
+  const midN = smoothSeries(robustNormalize(midE), 0.25);
+  const highN = smoothSeries(robustNormalize(highE), 0.25);
+  const rmsN = smoothSeries(robustNormalize(rmsArr), 0.25);
+
+  const lines = [];
+  const frameCount = Math.min(lowN.length, midN.length, highN.length, rmsN.length);
+  for (let i = 0; i < frameCount; i++) {
+    const r = Math.max(0, Math.min(255, Math.round(highN[i] * 255)));
+    const g = Math.max(0, Math.min(255, Math.round(midN[i] * 255)));
+    const b = Math.max(0, Math.min(255, Math.round(lowN[i] * 255)));
+    // Luminosite: garde le max a 255, mais plus de variation (gamma + seuil bas)
+    const v = Math.max(0, Math.min(1, (rmsN[i] - 0.05) / 0.95));
+    const briNorm = Math.pow(v, 1.7);
+    const bri = Math.max(5, Math.min(255, Math.round(briNorm * 255)));
+    lines.push(`${r},${g},${b},${bri},${durationMs},${groupText}`);
+  }
+  return lines;
+}
+
+async function genererModeleDepuisMp3() {
+  const fileInput = document.getElementById('mp3fileModel') || document.getElementById('mp3file');
+  if (!fileInput || fileInput.files.length === 0) {
+    setGenerationInfo('Generation KO: choisis un fichier MP3', true);
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const modelName = sanitizeModelName(document.getElementById('modeleAutoNom')?.value);
+  const targetPath = `/modeles/${modelName}.txt`;
+  const groupText = getGroupDigitsText();
+
+  try {
+    setGenerationInfo('Generation en cours: decode audio...');
+    const arr = await file.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arr.slice(0));
+    await audioCtx.close();
+
+    const ch0 = audioBuffer.getChannelData(0);
+    const samples = new Float32Array(ch0.length);
+    samples.set(ch0);
+    if (audioBuffer.numberOfChannels > 1) {
+      const ch1 = audioBuffer.getChannelData(1);
+      const n = Math.min(ch0.length, ch1.length);
+      for (let i = 0; i < n; i++) samples[i] = (ch0[i] + ch1[i]) * 0.5;
+    }
+
+    const maxFrames = 5000;
+    let windowMs = 60;
+    const minWindowMs = 60;
+    const neededMs = Math.ceil((samples.length / maxFrames) / audioBuffer.sampleRate * 1000);
+    if (neededMs > windowMs) windowMs = neededMs;
+    if (windowMs < minWindowMs) windowMs = minWindowMs;
+
+    setGenerationInfo('Generation en cours: analyse spectrale...');
+    const lines = buildModeleFromPcm(samples, audioBuffer.sampleRate, groupText, windowMs);
+    if (lines.length === 0) throw new Error('Aucune frame generee');
+
+    if (lines.length > maxFrames) {
+      throw new Error('Trop de frames (' + lines.length + '). Augmente la fenetre.');
+    }
+
+    const modeleTxt = lines.join('\n') + '\n';
+    setGenerationInfo(`Generation: ${lines.length} frames, envoi vers ESP (chunks)...`);
+
+    await uploadModeleEnChunks(targetPath, modeleTxt, 1200);
+
+    const loadResp = await fetch(`/loadmodel?path=${encodeURIComponent(targetPath)}`);
+    const loadMsg = await loadResp.text();
+    if (!loadResp.ok) throw new Error('Chargement KO: ' + loadMsg);
+
+    setGenerationInfo(`Generation OK: ${lines.length} frames -> ${targetPath}`);
+    setSdInfo('Modele genere et charge: ' + targetPath, false);
+    await rafraichirModeles();
+    await refreshSdStatus();
+  } catch (err) {
+    setGenerationInfo('Generation KO: ' + err, true);
+  }
+}
+
+)W3";

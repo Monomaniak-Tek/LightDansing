@@ -1,0 +1,16 @@
+{
+  "_comment": "Template utilisateur. Le canal AP est fixe dans le firmware (AP_CHANNEL=1).",
+  "ap_ssid": "DANSE",
+  "ap_password": "",
+  "_ap_password_info": "Laisser vide pour AP ouvert. Mettre 8+ caracteres pour activer WPA2.",
+  "ssid": "",
+  "password": "",
+  "_sta_info": "SSID/mot de passe du Wi-Fi local. Laisser vide pour rester en mode AP.",
+  "wifi_tx_power": 68,
+  "_wifi_tx_power_info": "Puissance Wi-Fi en unite ESP-IDF (0.25 dBm). 68 = ~17 dBm. Exemples: 40 = ~10 dBm (moins de portee, moins de perturbations), 52 = ~13 dBm (intermediaire), 68 = ~17 dBm (bon compromis), 78 = ~19.5 dBm (plus de portee, plus sensible au bruit).",
+  "modele_actif": "/modele_personnalise.txt",
+  "led_count": 30,
+  "_led_count_info": "Valeur par defaut pour la config en lot du nombre de LEDs (1..250).",
+  "max_current_ma": 2500,
+  "_max_current_ma_info": "Valeur par defaut pour la config en lot de la limite de courant recepteur en mA (100..3500max)."
+}

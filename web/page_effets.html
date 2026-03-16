@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effets locaux</title>
+<style>
+body { font-family: Arial, sans-serif; text-align: center; margin-top: 24px; background-color: #111; color: white; }
+h1 { color: #27ae60; font-variant: small-caps; letter-spacing: 0.5px; }
+button { display:block; font-size: 18px; padding: 12px; margin: 6px auto; width: 90%; max-width: 350px; border: none; border-radius: 8px; cursor: pointer; background-color:#2980b9; }
+.modele-btn.btn-active { background-color: #27ae60; box-shadow: 0 0 0 2px #eaffea inset, 0 0 12px rgba(39, 174, 96, 0.8); }
+.btn-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:12px; }
+.btn-couleur-fixe input[type="color"] { width:44px; height:28px; padding:0; border:none; background:transparent; cursor:pointer; }
+label { margin: 8px; display: inline-block; }
+.section { margin: 18px; }
+.conn-status { max-width: 700px; margin: 8px auto 14px; padding: 10px; border: 1px solid #35506a; border-radius: 8px; background: #151a20; }
+.conn-ok { border-color: #2d7d46; }
+.conn-warn { border-color: #9a6e1f; }
+.conn-ko { border-color: #8b2d2d; }
+.inline-couleur-fixe { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:8px 0; }
+.nav { margin: 6px auto 16px; max-width: 700px; }
+.nav a { color: #7ec8ff; margin: 0 8px; }
+.group-toggle input { display: none; }
+.group-toggle span {
+  display: inline-block;
+  min-width: 78px;
+  text-align: center;
+  font-size: 13px;
+  padding: 6px 8px;
+  margin: 2px;
+  border-radius: 8px;
+  background: #2a2f36;
+  border: 1px solid #3a4a60;
+  cursor: pointer;
+}
+.group-toggle input:checked + span {
+  background: #27ae60;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 2px #eaffea inset;
+}
+.footer { margin: 24px auto 16px; max-width: 700px; font-size: 12px; color: #9fb3c8; }
+.footer a { color: #9fb3c8; }
+</style>
+</head>
+<body>
+<h1>Effets locaux récepteurs</h1>
+<div class="nav">
+  <a href="/effets"><strong>Effets locaux</strong></a>
+  <a href="/modele">Effet personnalise</a>
+  <a href="/config">Configuration</a>
+</div>
+<div id="connStatus" class="conn-status">Connexion: vérification...</div>
+
+<div class="section">
+<h2>Choix des groupes</h2>
+<label class="group-toggle"><input type="checkbox" value="0" checked><span>Bleu</span></label>
+<label class="group-toggle"><input type="checkbox" value="1" checked><span>Rouge</span></label>
+<label class="group-toggle"><input type="checkbox" value="2" checked><span>Vert</span></label>
+<label class="group-toggle"><input type="checkbox" value="3" checked><span>Violet</span></label>
+<label class="group-toggle"><input type="checkbox" value="4" checked><span>Blanc</span></label>
+<label class="group-toggle"><input type="checkbox" value="5" checked><span>Jaune</span></label>
+</div>
+
+<div class="section">
+<h2>Luminosité globale</h2>
+<div class="inline-couleur-fixe">
+  <input type="range" id="luminositeGlobale" min="0" max="255" value="255" oninput="updateLuminositeLabel()" onchange="applyLuminositeOnRelease()">
+  <span id="luminositeValeur">255</span>
+</div>
+</div>
+
+<div class="section">
+<h2>Effets</h2>
+<button id="btnEffet0" class="modele-btn" onclick="envoyer(0, 'btnEffet0')">Éteint</button>
+<button id="btnEffet1" class="modele-btn" onclick="envoyer(1, 'btnEffet1')">Blanc fixe</button>
+<button id="btnCouleurFixe" class="modele-btn btn-couleur-fixe" onclick="envoyerCouleurFixe('btnCouleurFixe')">
+  Couleur choisie fixe
+  <input type="color" id="couleurFixe" value="#0000ff" title="Choisir la couleur fixe" onclick="event.stopPropagation();" onchange="event.stopPropagation();" oninput="event.stopPropagation();">
+</button>
+<button id="btnEffet2" class="modele-btn" onclick="envoyer(2, 'btnEffet2')">Vague lumineuse</button>
+<button id="btnEffet3" class="modele-btn" onclick="envoyer(3, 'btnEffet3')">Pulsation</button>
+<button id="btnEffet4" class="modele-btn" onclick="envoyer(4, 'btnEffet4')">Stroboscope</button>
+<button id="btnEffet5" class="modele-btn" onclick="envoyer(5, 'btnEffet5')">Arc-en-ciel</button>
+<button id="btnEffet6" class="modele-btn" onclick="envoyer(6, 'btnEffet6')">Explosion centrale</button>
+<button id="btnEffet7" class="modele-btn" onclick="envoyer(7, 'btnEffet7')">Scanner gauche-droite</button>
+<button id="btnEffet8" class="modele-btn" onclick="envoyer(8, 'btnEffet8')">Étincelles</button>
+<button id="btnEffet10" class="modele-btn" onclick="envoyer(10, 'btnEffet10')">Accélération</button>
+<button id="btnEffet11" class="modele-btn" onclick="envoyer(11, 'btnEffet11')">Paillettes</button>
+<button id="btnEffet12" class="modele-btn" onclick="envoyer(12, 'btnEffet12')">Balayage</button>
+<button id="btnEffet13" class="modele-btn" onclick="envoyer(13, 'btnEffet13')">Jonglage</button>
+<button id="btnEffet14" class="modele-btn" onclick="envoyer(14, 'btnEffet14')">BPM / Beat</button>
+<button id="btnEffet15" class="modele-btn" onclick="envoyer(15, 'btnEffet15')">Feu / Heat</button>
+<button id="btnEffet16" class="modele-btn" onclick="envoyer(16, 'btnEffet16')">Vagues couleur</button>
+</div>
+
+<div class="footer">
+  © 2026 Association Danse Passion — Version V1.0 — Code source :
+  <a href="https://github.com/Monomaniak-Tek/LightDansing" target="_blank" rel="noopener">https://github.com/Monomaniak-Tek/LightDansing</a>
+</div>
+
+<script>
+let lastConnOkMs = 0;
+
+function getMasqueGroupes() {
+  let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  let masque = 0;
+  checkboxes.forEach(cb => {
+    if (cb.checked) masque |= (1 << parseInt(cb.value, 10));
+  });
+  return masque;
+}
+
+function setModeleActifButton(buttonId) {
+  document.querySelectorAll('.modele-btn').forEach(btn => btn.classList.remove('btn-active'));
+  const current = document.getElementById(buttonId);
+  if (current) current.classList.add('btn-active');
+}
+
+function setConnStatus(text, state) {
+  const el = document.getElementById('connStatus');
+  if (!el) return;
+  el.textContent = text;
+  el.classList.remove('conn-ok', 'conn-warn', 'conn-ko');
+  if (state === 'ok') el.classList.add('conn-ok');
+  else if (state === 'warn') el.classList.add('conn-warn');
+  else el.classList.add('conn-ko');
+}
+
+async function pingConnexion() {
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/runtimecfg?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const dt = Math.round(performance.now() - t0);
+    const now = Date.now();
+    const gap = lastConnOkMs === 0 ? 0 : now - lastConnOkMs;
+    const nbRecepteurs = (typeof data.activeReceivers === 'number') ? data.activeReceivers : '?';
+    lastConnOkMs = now;
+    if (gap > 30000) setConnStatus(`Connexion: reprise (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'warn');
+    else setConnStatus(`Connexion active (${dt} ms) | Recepteurs actifs: ${nbRecepteurs}`, 'ok');
+  } catch (_) {
+    setConnStatus('Connexion: hors ligne / attente | Recepteurs actifs: ?', 'ko');
+  }
+}
+
+function envoyer(effet, buttonId) {
+  let masque = getMasqueGroupes();
+  fetch(`/send?g=${masque}&e=${effet}`)
+    .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+    .catch(err => console.log('Erreur envoi effet:', err));
+}
+
+function envoyerCouleurFixe(buttonId) {
+  let masque = getMasqueGroupes();
+  let hex = document.getElementById('couleurFixe').value;
+  let r = parseInt(hex.substring(1, 3), 16);
+  let g = parseInt(hex.substring(3, 5), 16);
+  let b = parseInt(hex.substring(5, 7), 16);
+  fetch(`/send?g=${masque}&e=9&cr=${r}&cg=${g}&cb=${b}`)
+    .then(() => { if (buttonId) setModeleActifButton(buttonId); })
+    .catch(err => console.log('Erreur envoi couleur fixe:', err));
+}
+
+function updateLuminositeLabel() {
+  const v = document.getElementById('luminositeGlobale').value;
+  document.getElementById('luminositeValeur').textContent = v;
+}
+
+function setLuminositeGlobale() {
+  let masque = getMasqueGroupes();
+  let v = document.getElementById('luminositeGlobale').value;
+  fetch(`/setbrightness?g=${masque}&b=${v}`)
+    .catch(err => console.log('Erreur config luminosite:', err));
+}
+
+function applyLuminositeOnRelease() {
+  setLuminositeGlobale();
+}
+
+pingConnexion();
+setInterval(pingConnexion, 5000);
+updateLuminositeLabel();
+</script>
+</body>
+</html>
